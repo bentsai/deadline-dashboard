@@ -55,6 +55,10 @@ const PAGE: &[u8] = br##"<!doctype html>
       min-height: 220px;
       justify-content: space-between;
     }
+    .card { position: relative; overflow: hidden; }
+    .card .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-size: 10rem; line-height: 1; pointer-events: none; opacity: .15; z-index: 0; }
+    .card.urgent .stamp { opacity: .25; }
+    .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent { background: #ff0000; color: #fff; border-color: #ff0000; outline-color: #ff0000; }
     .card.urgent .card-date { color: rgba(255,255,255,.7); }
     .card.urgent .label { color: rgba(255,255,255,.7); }
@@ -431,7 +435,11 @@ const PAGE: &[u8] = br##"<!doctype html>
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
-        card.innerHTML = '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
+        let stamp = "";
+        if (days < 0) stamp = '<span class="stamp">&#x2716;</span>';
+        else if (days <= 2) stamp = '<span class="stamp">&#x26A0;</span>';
+        else if (days <= 7) stamp = '<span class="stamp">&#x23F0;</span>';
+        card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
           + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
           + '<span class="label">' + (days < 0 ? "days ago" : "days left") + '</span>';
