@@ -188,13 +188,13 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .delete-btn:hover { color: #ff0000; }
     h2 {
-      font-size: 1.5rem;
+      font-size: 3rem;
       text-transform: uppercase;
       letter-spacing: .1em;
       margin-top: 3rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       padding-top: 2rem;
-      border-top: 3px solid #333;
+      border-top: 6px solid #fff;
     }
     .now-grid {
       display: grid;
@@ -216,7 +216,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     .now-card:hover { border-color: #ffcc00; }
     .now-card.editing { border-color: #fff; cursor: default; }
     .now-card .now-text {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       font-weight: 400;
       line-height: 1.4;
     }
@@ -472,7 +472,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       }
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") render(); });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
-      document.getElementById("edit-delete").addEventListener("click", (e) => { e.stopPropagation(); deadlines.splice(idx, 1); save(deadlines); render(); });
+      document.getElementById("edit-delete").addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saved = true; deadlines.splice(idx, 1); save(deadlines); render(); });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
@@ -534,7 +534,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       }
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") renderNow(); });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
-      document.getElementById("now-edit-delete").addEventListener("click", (e) => { e.stopPropagation(); cards.splice(idx, 1); saveNow(cards); renderNow(); });
+      document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saved = true; cards.splice(idx, 1); saveNow(cards); renderNow(); });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
