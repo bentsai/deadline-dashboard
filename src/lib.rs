@@ -17,11 +17,14 @@ const PAGE: &[u8] = br##"<!doctype html>
   <meta charset="utf-8">
   <title>DEADLINES</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
-      font-family: "Arial Black", "Arial Bold", sans-serif;
+      font-family: "Rubik", sans-serif;
       background: #000;
       color: #fff;
       padding: 2rem;
@@ -68,7 +71,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       letter-spacing: .05em;
     }
     .card-date {
-      font-family: Arial, sans-serif;
+      font-family: "Rubik", sans-serif;
       font-size: .85rem;
       font-weight: 400;
       color: #555;
@@ -103,7 +106,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       font-size: 1.5rem;
       font-weight: 400;
       color: #333;
-      font-family: Arial, sans-serif;
+      font-family: "Rubik", sans-serif;
       transition: color .15s;
     }
     .add-card:hover .plus { color: #666; }
@@ -122,18 +125,18 @@ const PAGE: &[u8] = br##"<!doctype html>
       border: 3px solid #fff;
       background: #000;
       color: #fff;
-      font: 900 1rem "Arial Black", sans-serif;
+      font: 900 1rem "Rubik", sans-serif;
     }
-    .inline-input::placeholder { color: #444; text-transform: none; font-weight: 400; font-family: Arial, sans-serif; font-size: .9rem; }
+    .inline-input::placeholder { color: #444; text-transform: none; font-weight: 400; font-family: "Rubik", sans-serif; font-size: .9rem; }
     .inline-input:focus { outline: none; border-color: #ffcc00; }
     .inline-hint {
-      font-family: Arial, sans-serif;
+      font-family: "Rubik", sans-serif;
       font-size: .7rem;
       font-weight: 400;
       color: #444;
     }
     .inline-error {
-      font-family: Arial, sans-serif;
+      font-family: "Rubik", sans-serif;
       font-size: .8rem;
       font-weight: 700;
       color: #ff0000;
@@ -144,7 +147,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       border: 2px solid #555;
       background: transparent;
       color: #999;
-      font: 700 .75rem Arial, sans-serif;
+      font: 700 .75rem "Rubik", sans-serif;
       text-transform: uppercase;
       letter-spacing: .05em;
       cursor: pointer;
@@ -353,23 +356,24 @@ const PAGE: &[u8] = br##"<!doctype html>
         addCard.removeEventListener("click", handler);
         addCard.classList.add("active");
         addCard.innerHTML = '<input class="inline-input" id="add-input" placeholder="Project proposal due June 15">'
-          + '<span class="inline-hint">Type name and date together. e.g. &quot;Budget review next friday at 2pm&quot;</span>'
-          + '<span class="inline-error" id="add-error"></span>'
-          + '<div class="inline-actions"><button class="primary" id="add-save">Save</button><button id="add-cancel">Cancel</button></div>';
-        document.getElementById("add-input").focus();
-        document.getElementById("add-save").addEventListener("click", doAdd);
-        document.getElementById("add-cancel").addEventListener("click", () => render());
-        document.getElementById("add-input").addEventListener("keydown", (e) => { if (e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
+          + '<span class="inline-hint">Enter to save. Esc to cancel.</span>'
+          + '<span class="inline-error" id="add-error"></span>';
+        const input = document.getElementById("add-input");
+        input.focus();
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
+        input.addEventListener("blur", () => { if (input.value.trim()) doAdd(); else render(); });
       });
       grid.appendChild(addCard);
     }
 
     function doAdd() {
-      const val = document.getElementById("add-input").value.trim();
+      const input = document.getElementById("add-input");
+      if (!input) return;
+      const val = input.value.trim();
       const err = document.getElementById("add-error");
-      if (!val) { err.textContent = "Type a name and date"; return; }
+      if (!val) { render(); return; }
       const result = splitInput(val);
-      if (!result) { err.textContent = "Include a date: e.g. \"Report due May 30\" or \"Call tomorrow at 3pm\""; return; }
+      if (!result) { if (err) err.textContent = "Include a date, e.g. \"Report due May 30\""; return; }
       const deadlines = load();
       deadlines.push({name: result.name, date: result.date});
       save(deadlines);
@@ -381,30 +385,27 @@ const PAGE: &[u8] = br##"<!doctype html>
       card.classList.add("editing");
       const deadlines = load();
       const d = deadlines[idx];
-      const prev = card.innerHTML;
       card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
         + '<span class="inline-error" id="edit-error"></span>'
-        + '<div class="inline-actions"><button class="primary" id="edit-save">Save</button><button id="edit-cancel">Cancel</button><button class="danger" id="edit-delete">Delete</button></div>';
+        + '<span class="inline-hint">Enter to save. Esc to cancel. Clear to delete.</span>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
-      document.getElementById("edit-save").addEventListener("click", () => doEdit(idx));
-      document.getElementById("edit-cancel").addEventListener("click", () => render());
-      document.getElementById("edit-delete").addEventListener("click", () => { deadlines.splice(idx, 1); save(deadlines); render(); });
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") doEdit(idx); if (e.key === "Escape") render(); });
+      let saved = false;
+      function trySave() {
+        if (saved) return;
+        saved = true;
+        const val = input.value.trim();
+        if (!val) { deadlines.splice(idx, 1); save(deadlines); render(); return; }
+        const result = splitInput(val);
+        if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
+        deadlines[idx] = {name: result.name, date: result.date};
+        save(deadlines);
+        render();
+      }
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") render(); });
+      input.addEventListener("blur", () => setTimeout(trySave, 100));
       card.addEventListener("click", (e) => e.stopPropagation());
-    }
-
-    function doEdit(idx) {
-      const val = document.getElementById("edit-input").value.trim();
-      const err = document.getElementById("edit-error");
-      if (!val) { err.textContent = "Type a name and date"; return; }
-      const result = splitInput(val);
-      if (!result) { err.textContent = "Include a date: e.g. \"Report due May 30\""; return; }
-      const deadlines = load();
-      deadlines[idx] = {name: result.name, date: result.date};
-      save(deadlines);
-      render();
     }
 
     function escAttr(s) { return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
