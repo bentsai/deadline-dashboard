@@ -207,15 +207,15 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .now-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
     }
     .now-card {
       background: #1a1a1a;
       color: #fff;
       padding: 2rem;
       border: 2px solid #333;
-      min-height: 160px;
+      min-height: 220px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -237,8 +237,8 @@ const PAGE: &[u8] = br##"<!doctype html>
     .now-add {
       background: transparent;
       border: 2px solid #222;
-      padding: 1.25rem;
-      min-height: 100px;
+      padding: 2rem;
+      min-height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
