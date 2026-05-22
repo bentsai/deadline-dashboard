@@ -153,6 +153,21 @@ const PAGE: &[u8] = br##"<!doctype html>
     .inline-actions button.primary { border-color: #fff; color: #fff; }
     .inline-actions button.primary:hover { background: #fff; color: #000; }
     .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
+    .card.ok .inline-actions button { border-color: #999; color: #333; }
+    .card.ok .inline-actions button:hover { border-color: #000; color: #000; }
+    .card.ok .inline-actions button.primary { border-color: #000; color: #000; }
+    .card.ok .inline-actions button.primary:hover { background: #000; color: #fff; }
+    .card.ok .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
+    .card.ok .inline-input { border-color: #000; background: #fff; color: #000; }
+    .card.ok .inline-input:focus { border-color: #000; }
+    .card.ok .inline-error { color: #ff0000; }
+    .card.soon .inline-actions button { border-color: #666; color: #333; }
+    .card.soon .inline-actions button:hover { border-color: #000; color: #000; }
+    .card.soon .inline-actions button.primary { border-color: #000; color: #000; }
+    .card.soon .inline-actions button.primary:hover { background: #000; color: #ffcc00; }
+    .card.soon .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
+    .card.soon .inline-input { border-color: #000; background: #ffcc00; color: #000; }
+    .card.soon .inline-input:focus { border-color: #000; }
     .card { cursor: pointer; transition: outline-color .1s; }
     .card:hover { outline-color: #ffcc00; }
     .card.editing { outline-color: #fff; cursor: default; }
