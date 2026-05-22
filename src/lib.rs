@@ -224,8 +224,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       transition: border-color .15s;
     }
     .now-card:hover { border-color: #ffcc00; }
-    .now-card.dragging { opacity: .4; border-color: #ffcc00; }
-    .now-card.drag-over { border-color: #fff; border-style: dashed; }
+    .now-card.dragging { opacity: .3; transform: scale(.95); }
+    .now-card { transition: border-color .15s, transform .15s; }
     .now-card.editing { border-color: #fff; cursor: default; }
     .now-card .now-text {
       font-size: 2rem;
@@ -269,6 +269,7 @@ const PAGE: &[u8] = br##"<!doctype html>
   <h2>Now</h2>
   <div class="now-grid" id="now-grid"></div>
   <script>
+    let nowDragIdx = null;
     function makeSeed() {
       const now = new Date();
       const d = (offset, h) => { const dt = new Date(now); dt.setDate(dt.getDate() + offset); dt.setHours(h || 9, 0, 0, 0); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":00"; };
@@ -529,11 +530,9 @@ const PAGE: &[u8] = br##"<!doctype html>
         card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startNowEdit(card, i));
         card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startNowEdit(card, i); } });
-        card.addEventListener("dragstart", (e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", i); card.classList.add("dragging"); });
-        card.addEventListener("dragend", () => card.classList.remove("dragging"));
-        card.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; card.classList.add("drag-over"); });
-        card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
-        card.addEventListener("drop", (e) => { e.preventDefault(); card.classList.remove("drag-over"); const from = parseInt(e.dataTransfer.getData("text/plain")); const to = i; if (from !== to) { const items = loadNow(); const moved = items.splice(from, 1)[0]; items.splice(to, 0, moved); saveNow(items); renderNow(); } });
+        card.addEventListener("dragstart", (e) => { e.dataTransfer.effectAllowed = "move"; nowDragIdx = i; card.classList.add("dragging"); });
+        card.addEventListener("dragend", () => { card.classList.remove("dragging"); if (nowDragIdx !== null) { const els = [...grid.querySelectorAll(".now-card")]; const newOrder = els.map(el => parseInt(el.dataset.idx)); const items = loadNow(); const reordered = newOrder.map(idx => items[idx]); saveNow(reordered); nowDragIdx = null; renderNow(); } });
+        card.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; const dragging = grid.querySelector(".dragging"); if (dragging && dragging !== card) { const cards = [...grid.querySelectorAll(".now-card")]; const dragPos = cards.indexOf(dragging); const hoverPos = cards.indexOf(card); if (dragPos < hoverPos) { card.after(dragging); } else { card.before(dragging); } } });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
