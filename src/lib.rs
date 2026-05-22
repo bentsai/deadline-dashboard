@@ -64,10 +64,10 @@ const PAGE: &[u8] = br##"<!doctype html>
     .card.urgent .label { color: rgba(255,255,255,.7); }
     .card.urgent .delete-btn { color: rgba(255,255,255,.5); }
     .card.urgent .delete-btn:hover { color: #fff; }
-    .card.urgent .inline-actions button { border-color: rgba(255,255,255,.5); color: rgba(255,255,255,.7); }
-    .card.urgent .inline-actions button:hover { border-color: #fff; color: #fff; }
-    .card.urgent .inline-actions button.danger:hover { border-color: #ffcc00; color: #ffcc00; }
-    .card.urgent .inline-input { border-color: rgba(255,255,255,.5); background: rgba(0,0,0,.3); color: #fff; }
+    .card.urgent .inline-actions button { color: rgba(255,255,255,.6); }
+    .card.urgent .inline-actions button:hover { color: #fff; }
+    .card.urgent .inline-actions button.danger:hover { color: #ffcc00; }
+    .card.urgent .inline-input { border-color: rgba(255,255,255,.4); color: #fff; }
     .card.urgent .inline-input:focus { border-color: #fff; }
     .card.soon { background: #ffcc00; color: #000; border-color: #ffcc00; outline-color: #ffcc00; }
     .card.past { background: #333; color: #999; border-color: #333; outline-color: #555; }
@@ -131,14 +131,15 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .inline-input {
       width: 100%;
-      padding: .75rem;
-      border: 3px solid #fff;
-      background: #000;
+      padding: 1rem;
+      border: 2px solid #555;
+      background: transparent;
       color: #fff;
-      font: 900 1rem "Rubik", sans-serif;
+      font: 400 1.2rem "Rubik", sans-serif;
+      resize: none;
     }
-    .inline-input::placeholder { color: #444; text-transform: none; font-weight: 400; font-family: "Rubik", sans-serif; font-size: .9rem; }
-    .inline-input:focus { outline: none; border-color: #ffcc00; }
+    .inline-input::placeholder { color: #555; font-weight: 400; font-size: 1.1rem; }
+    .inline-input:focus { outline: none; border-color: #fff; }
     .inline-hint {
       font-family: "Rubik", sans-serif;
       font-size: .7rem;
@@ -151,35 +152,29 @@ const PAGE: &[u8] = br##"<!doctype html>
       font-weight: 700;
       color: #ff0000;
     }
-    .inline-actions { display: flex; gap: .5rem; margin-top: .25rem; }
+    .inline-actions { display: flex; align-items: center; gap: .75rem; margin-top: .5rem; }
     .inline-actions button {
-      padding: .5rem 1rem;
-      border: 2px solid #555;
+      padding: .4rem .75rem;
+      border: none;
       background: transparent;
-      color: #999;
-      font: 700 .75rem "Rubik", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      color: #555;
+      font: 400 .8rem "Rubik", sans-serif;
       cursor: pointer;
+      text-decoration: underline;
     }
-    .inline-actions button:hover { border-color: #fff; color: #fff; }
-    .inline-actions button.primary { border-color: #fff; color: #fff; }
-    .inline-actions button.primary:hover { background: #fff; color: #000; }
-    .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
-    .card.ok .inline-actions button { border-color: #999; color: #333; }
-    .card.ok .inline-actions button:hover { border-color: #000; color: #000; }
-    .card.ok .inline-actions button.primary { border-color: #000; color: #000; }
-    .card.ok .inline-actions button.primary:hover { background: #000; color: #fff; }
-    .card.ok .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
-    .card.ok .inline-input { border-color: #000; background: #fff; color: #000; }
+    .inline-actions button:hover { color: #fff; }
+    .inline-actions button.danger { color: #666; }
+    .inline-actions button.danger:hover { color: #ff0000; text-decoration: underline; }
+    .card.ok .inline-actions button { color: #999; }
+    .card.ok .inline-actions button:hover { color: #000; }
+    .card.ok .inline-actions button.danger:hover { color: #ff0000; }
+    .card.ok .inline-input { border-color: #ccc; color: #000; }
     .card.ok .inline-input:focus { border-color: #000; }
     .card.ok .inline-error { color: #ff0000; }
-    .card.soon .inline-actions button { border-color: #666; color: #333; }
-    .card.soon .inline-actions button:hover { border-color: #000; color: #000; }
-    .card.soon .inline-actions button.primary { border-color: #000; color: #000; }
-    .card.soon .inline-actions button.primary:hover { background: #000; color: #ffcc00; }
-    .card.soon .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
-    .card.soon .inline-input { border-color: #000; background: #ffcc00; color: #000; }
+    .card.soon .inline-actions button { color: #666; }
+    .card.soon .inline-actions button:hover { color: #000; }
+    .card.soon .inline-actions button.danger:hover { color: #ff0000; }
+    .card.soon .inline-input { border-color: #999; color: #000; }
     .card.soon .inline-input:focus { border-color: #000; }
     .card { cursor: pointer; transition: outline-color .1s; }
     .card:hover, .card:focus { outline-color: #ffcc00; }
@@ -232,6 +227,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       font-size: 2rem;
       font-weight: 400;
       line-height: 1.3;
+      white-space: pre-line;
     }
     .now-card .inline-input { border-color: #555; background: #111; color: #fff; }
     .now-card .inline-input:focus { border-color: #ffcc00; }
@@ -438,7 +434,7 @@ const PAGE: &[u8] = br##"<!doctype html>
         let stamp = "";
         if (days < 0) stamp = '<span class="stamp">&#x2716;</span>';
         else if (days <= 2) stamp = '<span class="stamp">&#x26A0;</span>';
-        else if (days <= 7) stamp = '<span class="stamp">&#x23F0;</span>';
+        else if (days <= 7) stamp = '<span class="stamp">&#x25B2;</span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
           + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
@@ -492,7 +488,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       const d = deadlines[idx];
       card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
         + '<span class="inline-error" id="edit-error"></span>'
-        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">Delete</button></div>';
+        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -539,10 +535,10 @@ const PAGE: &[u8] = br##"<!doctype html>
         addCard.removeAttribute("role");
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
-        addCard.innerHTML = '<input class="inline-input" id="now-add-input" placeholder="What is top of mind?">';
+        addCard.innerHTML = '<textarea class="inline-input" id="now-add-input" rows="3" placeholder="What is top of mind?"></textarea>';
         const input = document.getElementById("now-add-input");
         input.focus();
-        input.addEventListener("keydown", (e) => { if (e.key === "Enter") doNowAdd(); if (e.key === "Escape") renderNow(); });
+        input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") doNowAdd(); if (e.key === "Escape") renderNow(); });
         input.addEventListener("blur", () => { if (input.value.trim()) doNowAdd(); else renderNow(); });
       }
       addCard.addEventListener("click", activateNowAdd);
@@ -565,8 +561,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
       const cards = loadNow();
-      card.innerHTML = '<input class="inline-input" id="now-edit-input" value="' + escAttr(cards[idx].text) + '">'
-        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="now-edit-delete">Delete</button></div>';
+      card.innerHTML = '<textarea class="inline-input" id="now-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
+        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="now-edit-delete">delete</button></div>';
       const input = document.getElementById("now-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -580,7 +576,7 @@ const PAGE: &[u8] = br##"<!doctype html>
         saveNow(cards);
         renderNow();
       }
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") renderNow(); });
+      input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave(); if (e.key === "Escape") renderNow(); });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
       document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saved = true; cards.splice(idx, 1); saveNow(cards); renderNow(); });
       card.addEventListener("click", (e) => e.stopPropagation());
