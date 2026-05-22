@@ -19,7 +19,7 @@ const PAGE: &[u8] = br##"<!doctype html>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -77,8 +77,9 @@ const PAGE: &[u8] = br##"<!doctype html>
       color: #555;
     }
     .card-days {
+      font-family: "Rubik Mono One", monospace;
       font-size: 7rem;
-      font-weight: 900;
+      font-weight: 400;
       line-height: 1;
       letter-spacing: -.04em;
     }
