@@ -265,18 +265,29 @@ const PAGE: &[u8] = br##"<!doctype html>
   <h2>Now</h2>
   <div class="now-grid" id="now-grid"></div>
   <script>
-    const SEED = [{name:"Performance reflection due",date:"2026-05-29T09:00"}];
+    function makeSeed() {
+      const now = new Date();
+      const d = (offset, h) => { const dt = new Date(now); dt.setDate(dt.getDate() + offset); dt.setHours(h || 9, 0, 0, 0); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":00"; };
+      return [
+        {name:"Submit quarterly report", date:d(1, 17)},
+        {name:"Design review with team", date:d(5, 10)},
+        {name:"Launch blog post", date:d(14, 9)},
+        {name:"Renew domain registration", date:d(30, 9)}
+      ];
+    }
+    const NOW_SEED = [{text:"Prep talking points for 1:1"},{text:"Reply to Slack thread on launch plan"},{text:"Read RFC on new auth flow"}];
     const KEY = "deadline-dashboard-v1";
     const NOW_KEY = "now-cards-v1";
 
     function load() {
       const raw = localStorage.getItem(KEY);
       if (raw) return JSON.parse(raw);
-      save(SEED);
-      return SEED;
+      const seed = makeSeed();
+      save(seed);
+      return seed;
     }
     function save(deadlines) { localStorage.setItem(KEY, JSON.stringify(deadlines)); }
-    function loadNow() { const raw = localStorage.getItem(NOW_KEY); return raw ? JSON.parse(raw) : []; }
+    function loadNow() { const raw = localStorage.getItem(NOW_KEY); if (raw) return JSON.parse(raw); saveNow(NOW_SEED); return NOW_SEED; }
     function saveNow(cards) { localStorage.setItem(NOW_KEY, JSON.stringify(cards)); }
 
     function daysUntil(dateStr) {
