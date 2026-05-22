@@ -1,0 +1,4 @@
+[tool]
+name = "deadline-dashboard"
+description = "Countdown dashboard showing days until important deadlines"
+lane = "wasm"
