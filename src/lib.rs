@@ -435,7 +435,9 @@ impl Guest for Component {
         ResponseOutparam::set(response_out, Ok(response));
 
         let stream = body.write().unwrap();
-        stream.blocking_write_and_flush(PAGE).unwrap();
+        for chunk in PAGE.chunks(4096) {
+            stream.blocking_write_and_flush(chunk).unwrap();
+        }
         drop(stream);
         OutgoingBody::finish(body, None).unwrap();
     }
