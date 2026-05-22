@@ -78,7 +78,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .card-days {
       font-family: "Rubik Mono One", monospace;
-      font-size: 7rem;
+      font-size: 9rem;
       font-weight: 400;
       line-height: 1;
       letter-spacing: -.04em;
@@ -187,14 +187,78 @@ const PAGE: &[u8] = br##"<!doctype html>
       margin-left: auto;
     }
     .delete-btn:hover { color: #ff0000; }
+    h2 {
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+      padding-top: 2rem;
+      border-top: 3px solid #333;
+    }
+    .now-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .now-card {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 1.25rem;
+      border: 2px solid #333;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .now-card:hover { border-color: #ffcc00; }
+    .now-card.editing { border-color: #fff; cursor: default; }
+    .now-card .now-text {
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+    .now-card .inline-input { border-color: #555; background: #111; color: #fff; }
+    .now-card .inline-input:focus { border-color: #ffcc00; }
+    .now-card .inline-actions button { border-color: #555; color: #888; }
+    .now-card .inline-actions button:hover { border-color: #fff; color: #fff; }
+    .now-card .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
+    .now-add {
+      background: transparent;
+      border: 2px solid #222;
+      padding: 1.25rem;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .now-add:hover { border-color: #555; }
+    .now-add .plus { font-size: 1rem; font-weight: 400; color: #333; }
+    .now-add:hover .plus { color: #555; }
+    .now-add.active {
+      border-color: #fff;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: start;
+      gap: .5rem;
+      cursor: default;
+      padding: 1.25rem;
+    }
   </style>
 </head>
 <body>
   <h1>Deadlines</h1>
   <div class="grid" id="grid"></div>
+  <h2>Now</h2>
+  <div class="now-grid" id="now-grid"></div>
   <script>
     const SEED = [{name:"Performance reflection due",date:"2026-05-29T09:00"}];
     const KEY = "deadline-dashboard-v1";
+    const NOW_KEY = "now-cards-v1";
 
     function load() {
       const raw = localStorage.getItem(KEY);
@@ -203,6 +267,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       return SEED;
     }
     function save(deadlines) { localStorage.setItem(KEY, JSON.stringify(deadlines)); }
+    function loadNow() { const raw = localStorage.getItem(NOW_KEY); return raw ? JSON.parse(raw) : []; }
+    function saveNow(cards) { localStorage.setItem(NOW_KEY, JSON.stringify(cards)); }
 
     function daysUntil(dateStr) {
       const target = new Date(dateStr);
@@ -388,7 +454,7 @@ const PAGE: &[u8] = br##"<!doctype html>
       const d = deadlines[idx];
       card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
         + '<span class="inline-error" id="edit-error"></span>'
-        + '<span class="inline-hint">Enter to save. Esc to cancel. Clear to delete.</span>';
+        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">Delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -397,7 +463,7 @@ const PAGE: &[u8] = br##"<!doctype html>
         if (saved) return;
         saved = true;
         const val = input.value.trim();
-        if (!val) { deadlines.splice(idx, 1); save(deadlines); render(); return; }
+        if (!val) { render(); return; }
         const result = splitInput(val);
         if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
         deadlines[idx] = {name: result.name, date: result.date};
@@ -406,6 +472,69 @@ const PAGE: &[u8] = br##"<!doctype html>
       }
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") render(); });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
+      document.getElementById("edit-delete").addEventListener("click", (e) => { e.stopPropagation(); deadlines.splice(idx, 1); save(deadlines); render(); });
+      card.addEventListener("click", (e) => e.stopPropagation());
+    }
+
+    function renderNow() {
+      const cards = loadNow();
+      const grid = document.getElementById("now-grid");
+      grid.innerHTML = "";
+      cards.forEach((c, i) => {
+        const card = document.createElement("div");
+        card.className = "now-card";
+        card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
+        card.addEventListener("click", () => startNowEdit(card, i));
+        grid.appendChild(card);
+      });
+      const addCard = document.createElement("div");
+      addCard.className = "now-add";
+      addCard.innerHTML = '<span class="plus">+ new</span>';
+      addCard.addEventListener("click", function handler() {
+        addCard.removeEventListener("click", handler);
+        addCard.classList.add("active");
+        addCard.innerHTML = '<input class="inline-input" id="now-add-input" placeholder="What is top of mind?">';
+        const input = document.getElementById("now-add-input");
+        input.focus();
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") doNowAdd(); if (e.key === "Escape") renderNow(); });
+        input.addEventListener("blur", () => { if (input.value.trim()) doNowAdd(); else renderNow(); });
+      });
+      grid.appendChild(addCard);
+    }
+
+    function doNowAdd() {
+      const input = document.getElementById("now-add-input");
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) { renderNow(); return; }
+      const cards = loadNow();
+      cards.push({text: val});
+      saveNow(cards);
+      renderNow();
+    }
+
+    function startNowEdit(card, idx) {
+      if (card.classList.contains("editing")) return;
+      card.classList.add("editing");
+      const cards = loadNow();
+      card.innerHTML = '<input class="inline-input" id="now-edit-input" value="' + escAttr(cards[idx].text) + '">'
+        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="now-edit-delete">Delete</button></div>';
+      const input = document.getElementById("now-edit-input");
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
+      let saved = false;
+      function trySave() {
+        if (saved) return;
+        saved = true;
+        const val = input.value.trim();
+        if (!val) { renderNow(); return; }
+        cards[idx] = {text: val};
+        saveNow(cards);
+        renderNow();
+      }
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") renderNow(); });
+      input.addEventListener("blur", () => setTimeout(trySave, 100));
+      document.getElementById("now-edit-delete").addEventListener("click", (e) => { e.stopPropagation(); cards.splice(idx, 1); saveNow(cards); renderNow(); });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
@@ -418,7 +547,8 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
 
     render();
-    setInterval(render, 60000);
+    renderNow();
+    setInterval(() => { render(); renderNow(); }, 60000);
   </script>
 </body>
 </html>
