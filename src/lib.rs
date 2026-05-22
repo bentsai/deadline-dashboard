@@ -56,9 +56,9 @@ const PAGE: &[u8] = br##"<!doctype html>
       justify-content: space-between;
     }
     .card { position: relative; overflow: hidden; }
-    .card .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-size: 10rem; line-height: 1; pointer-events: none; opacity: .15; z-index: 0; }
+    .card .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-family: "Rubik Mono One", monospace; font-size: 10rem; line-height: 1; pointer-events: none; opacity: .15; z-index: 0; }
     .card.urgent .stamp { opacity: .25; }
-    .card.soon .stamp { font-size: 14rem; }
+    .card.soon .stamp { font-size: 12rem; }
     .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent { background: #ff0000; color: #fff; border-color: #ff0000; outline-color: #ff0000; }
     .card.urgent .card-date { color: rgba(255,255,255,.7); }
@@ -436,13 +436,13 @@ const PAGE: &[u8] = br##"<!doctype html>
         let stamp = "";
         if (days < 0) stamp = '<span class="stamp">&#x2716;</span>';
         else if (days <= 2) stamp = '<span class="stamp">&#x26A0;</span>';
-        else if (days <= 7) stamp = '<span class="stamp">&#x25A0;</span>';
+        else if (days <= 7) stamp = '<span class="stamp">||</span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
           + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
           + '<span class="label">' + (days < 0 ? "days ago" : "days left") + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
-        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startEdit(card, i); } });
+        card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startEdit(card, i); } });
         grid.appendChild(card);
       });
 
@@ -524,7 +524,7 @@ const PAGE: &[u8] = br##"<!doctype html>
         card.setAttribute("aria-label", c.text);
         card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startNowEdit(card, i));
-        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startNowEdit(card, i); } });
+        card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startNowEdit(card, i); } });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
