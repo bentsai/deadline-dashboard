@@ -178,8 +178,12 @@ const PAGE: &[u8] = br##"<!doctype html>
     .card.soon .inline-input { border-color: #000; background: #ffcc00; color: #000; }
     .card.soon .inline-input:focus { border-color: #000; }
     .card { cursor: pointer; transition: outline-color .1s; }
-    .card:hover { outline-color: #ffcc00; }
+    .card:hover, .card:focus { outline-color: #ffcc00; }
+    .card:focus { outline-style: solid; }
     .card.editing { outline-color: #fff; cursor: default; }
+    .now-card:focus { border-color: #ffcc00; outline: 2px solid #ffcc00; outline-offset: 2px; }
+    .add-card:focus { border-color: #666; outline: 2px solid #ffcc00; outline-offset: 2px; }
+    .now-add:focus { border-color: #555; outline: 2px solid #ffcc00; outline-offset: 2px; }
     .delete-btn {
       background: none;
       border: none;
@@ -410,6 +414,9 @@ const PAGE: &[u8] = br##"<!doctype html>
 
         const card = document.createElement("div");
         card.className = "card " + cls;
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", d.name + ", " + (days < 0 ? Math.abs(days) + " days ago" : days + " days left"));
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
@@ -418,14 +425,19 @@ const PAGE: &[u8] = br##"<!doctype html>
           + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
           + '<span class="label">' + (days < 0 ? "days ago" : "days left") + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
+        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startEdit(card, i); } });
         grid.appendChild(card);
       });
 
       const addCard = document.createElement("div");
       addCard.className = "add-card";
+      addCard.tabIndex = 0;
+      addCard.setAttribute("role", "button");
+      addCard.setAttribute("aria-label", "Add new deadline");
       addCard.innerHTML = '<span class="plus">+ new deadline</span>';
-      addCard.addEventListener("click", function handler() {
-        addCard.removeEventListener("click", handler);
+      function activateAdd() {
+        addCard.removeAttribute("role");
+        addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
         addCard.innerHTML = '<input class="inline-input" id="add-input" placeholder="Project proposal due June 15">'
           + '<span class="inline-hint">Enter to save. Esc to cancel.</span>'
@@ -434,7 +446,9 @@ const PAGE: &[u8] = br##"<!doctype html>
         input.focus();
         input.addEventListener("keydown", (e) => { if (e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
         input.addEventListener("blur", () => { if (input.value.trim()) doAdd(); else render(); });
-      });
+      }
+      addCard.addEventListener("click", activateAdd);
+      addCard.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateAdd(); } });
       grid.appendChild(addCard);
     }
 
@@ -488,22 +502,32 @@ const PAGE: &[u8] = br##"<!doctype html>
       cards.forEach((c, i) => {
         const card = document.createElement("div");
         card.className = "now-card";
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", c.text);
         card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startNowEdit(card, i));
+        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startNowEdit(card, i); } });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
       addCard.className = "now-add";
+      addCard.tabIndex = 0;
+      addCard.setAttribute("role", "button");
+      addCard.setAttribute("aria-label", "Add new item");
       addCard.innerHTML = '<span class="plus">+ new</span>';
-      addCard.addEventListener("click", function handler() {
-        addCard.removeEventListener("click", handler);
+      function activateNowAdd() {
+        addCard.removeAttribute("role");
+        addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
         addCard.innerHTML = '<input class="inline-input" id="now-add-input" placeholder="What is top of mind?">';
         const input = document.getElementById("now-add-input");
         input.focus();
         input.addEventListener("keydown", (e) => { if (e.key === "Enter") doNowAdd(); if (e.key === "Escape") renderNow(); });
         input.addEventListener("blur", () => { if (input.value.trim()) doNowAdd(); else renderNow(); });
-      });
+      }
+      addCard.addEventListener("click", activateNowAdd);
+      addCard.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateNowAdd(); } });
       grid.appendChild(addCard);
     }
 
