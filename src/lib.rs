@@ -193,8 +193,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       letter-spacing: .1em;
       margin-top: 3rem;
       margin-bottom: 2rem;
-      padding-top: 2rem;
-      border-top: 6px solid #fff;
+      padding-bottom: 1rem;
+      border-bottom: 6px solid #fff;
     }
     .now-grid {
       display: grid;
