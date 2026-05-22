@@ -88,41 +88,35 @@ const PAGE: &[u8] = br##"<!doctype html>
       color: #555;
     }
     .add-card {
-      background: #111;
-      border: 4px dashed #555;
+      background: transparent;
+      border: 2px solid #333;
       padding: 2rem;
       min-height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: border-color .1s;
+      transition: border-color .15s;
     }
-    .add-card:hover { border-color: #fff; }
+    .add-card:hover { border-color: #666; }
     .add-card .plus {
-      font-size: 4rem;
-      font-weight: 900;
-      color: #555;
-      transition: color .1s;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #333;
+      font-family: Arial, sans-serif;
+      transition: color .15s;
     }
-    .add-card:hover .plus { color: #fff; }
+    .add-card:hover .plus { color: #666; }
     .add-card.active {
-      border-style: solid;
       border-color: #fff;
       flex-direction: column;
       align-items: stretch;
       justify-content: start;
-      gap: 1rem;
+      gap: .75rem;
       cursor: default;
+      padding: 1.5rem;
     }
-    .add-card .field-label {
-      font-size: .75rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: #888;
-    }
-    .add-card input {
+    .inline-input {
       width: 100%;
       padding: .75rem;
       border: 3px solid #fff;
@@ -130,36 +124,38 @@ const PAGE: &[u8] = br##"<!doctype html>
       color: #fff;
       font: 900 1rem "Arial Black", sans-serif;
     }
-    .add-card input::placeholder { color: #444; text-transform: none; font-weight: 400; font-family: Arial, sans-serif; }
-    .add-card input:focus { outline: none; border-color: #ffcc00; }
-    .add-card .hint {
+    .inline-input::placeholder { color: #444; text-transform: none; font-weight: 400; font-family: Arial, sans-serif; font-size: .9rem; }
+    .inline-input:focus { outline: none; border-color: #ffcc00; }
+    .inline-hint {
       font-family: Arial, sans-serif;
-      font-size: .75rem;
+      font-size: .7rem;
       font-weight: 400;
-      color: #555;
+      color: #444;
     }
-    .add-card .error {
+    .inline-error {
       font-family: Arial, sans-serif;
       font-size: .8rem;
       font-weight: 700;
       color: #ff0000;
     }
-    .add-card .btn-row { display: flex; gap: .5rem; }
-    .add-card .btn {
-      padding: .6rem 1.2rem;
-      border: 3px solid #fff;
-      background: #fff;
-      color: #000;
-      font: 900 .9rem "Arial Black", sans-serif;
+    .inline-actions { display: flex; gap: .5rem; margin-top: .25rem; }
+    .inline-actions button {
+      padding: .5rem 1rem;
+      border: 2px solid #555;
+      background: transparent;
+      color: #999;
+      font: 700 .75rem Arial, sans-serif;
       text-transform: uppercase;
+      letter-spacing: .05em;
       cursor: pointer;
     }
-    .add-card .btn:hover { background: #ffcc00; border-color: #ffcc00; }
-    .add-card .btn-cancel {
-      background: transparent;
-      color: #fff;
-    }
-    .add-card .btn-cancel:hover { background: #333; border-color: #555; color: #fff; }
+    .inline-actions button:hover { border-color: #fff; color: #fff; }
+    .inline-actions button.primary { border-color: #fff; color: #fff; }
+    .inline-actions button.primary:hover { background: #fff; color: #000; }
+    .inline-actions button.danger:hover { border-color: #ff0000; color: #ff0000; }
+    .card { cursor: pointer; transition: outline-color .1s; }
+    .card:hover { outline-color: #ffcc00; }
+    .card.editing { outline-color: #fff; cursor: default; }
     .delete-btn {
       background: none;
       border: none;
@@ -274,6 +270,42 @@ const PAGE: &[u8] = br##"<!doctype html>
       return dt.getFullYear() + "-" + pad(dt.getMonth()+1) + "-" + pad(dt.getDate()) + "T" + pad(dt.getHours()) + ":" + pad(dt.getMinutes());
     }
 
+    function splitInput(str) {
+      const s = str.trim();
+      const patterns = [
+        /^(.+?)\s+((?:next\s+)?(?:mon|tue|wed|thu|fri|sat|sun)\w*(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(tomorrow(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(today(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s+\d{1,2}(?:[,\s]+\d{4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*(?:[,\s]+\d{4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+      ];
+      for (const re of patterns) {
+        const m = s.match(re);
+        if (m && m[1].trim() && parseDate(m[2].trim())) {
+          return { name: m[1].trim(), date: parseDate(m[2].trim()) };
+        }
+      }
+      return null;
+    }
+
+    function formatForEdit(d) {
+      const dateObj = new Date(d.date);
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const mo = months[dateObj.getMonth()];
+      const day = dateObj.getDate();
+      const year = dateObj.getFullYear();
+      const h = dateObj.getHours();
+      const m = dateObj.getMinutes();
+      let time = "";
+      if (h !== 9 || m !== 0) {
+        const suffix = h >= 12 ? "pm" : "am";
+        const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+        time = " at " + h12 + (m > 0 ? ":" + String(m).padStart(2,"0") : "") + suffix;
+      }
+      return d.name + " " + mo + " " + day + " " + year + time;
+    }
+
     function render() {
       const deadlines = load();
       deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -291,57 +323,76 @@ const PAGE: &[u8] = br##"<!doctype html>
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
-        card.innerHTML = '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span><button class="delete-btn" data-idx="' + i + '">&times;</button></div>'
+        card.innerHTML = '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
           + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
           + '<span class="label">' + (days < 0 ? "days ago" : "days left") + '</span>';
+        card.addEventListener("click", () => startEdit(card, i));
         grid.appendChild(card);
       });
 
       const addCard = document.createElement("div");
       addCard.className = "add-card";
-      addCard.innerHTML = '<span class="plus">+</span>';
+      addCard.innerHTML = '<span class="plus">+ new deadline</span>';
       addCard.addEventListener("click", function handler() {
         addCard.removeEventListener("click", handler);
         addCard.classList.add("active");
-        addCard.innerHTML = '<span class="field-label">Name</span>'
-          + '<input type="text" id="add-name" placeholder="e.g. Project proposal due">'
-          + '<span class="field-label">When</span>'
-          + '<input type="text" id="add-when" placeholder="e.g. June 15, next friday, tomorrow at 3pm">'
-          + '<span class="hint">Understands: month day, next weekday, tomorrow, mm/dd, time like 3pm</span>'
-          + '<span class="error" id="add-error"></span>'
-          + '<div class="btn-row"><button class="btn" id="add-save">Save</button><button class="btn btn-cancel" id="add-cancel">Cancel</button></div>';
-        document.getElementById("add-name").focus();
-        document.getElementById("add-save").addEventListener("click", doSave);
+        addCard.innerHTML = '<input class="inline-input" id="add-input" placeholder="Project proposal due June 15">'
+          + '<span class="inline-hint">Type name and date together. e.g. &quot;Budget review next friday at 2pm&quot;</span>'
+          + '<span class="inline-error" id="add-error"></span>'
+          + '<div class="inline-actions"><button class="primary" id="add-save">Save</button><button id="add-cancel">Cancel</button></div>';
+        document.getElementById("add-input").focus();
+        document.getElementById("add-save").addEventListener("click", doAdd);
         document.getElementById("add-cancel").addEventListener("click", () => render());
-        document.getElementById("add-when").addEventListener("keydown", (e) => { if (e.key === "Enter") doSave(); });
-        document.getElementById("add-name").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("add-when").focus(); } });
+        document.getElementById("add-input").addEventListener("keydown", (e) => { if (e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
       });
       grid.appendChild(addCard);
-
-      grid.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const deadlines = load();
-          deadlines.splice(parseInt(btn.dataset.idx), 1);
-          save(deadlines);
-          render();
-        });
-      });
     }
 
-    function doSave() {
-      const name = document.getElementById("add-name").value.trim();
-      const when = document.getElementById("add-when").value.trim();
+    function doAdd() {
+      const val = document.getElementById("add-input").value.trim();
       const err = document.getElementById("add-error");
-      if (!name) { err.textContent = "Name is required"; return; }
-      if (!when) { err.textContent = "Date is required"; return; }
-      const parsed = parseDate(when);
-      if (!parsed) { err.textContent = "Could not parse date. Try: June 15, next friday, 6/15, tomorrow"; return; }
+      if (!val) { err.textContent = "Type a name and date"; return; }
+      const result = splitInput(val);
+      if (!result) { err.textContent = "Include a date: e.g. \"Report due May 30\" or \"Call tomorrow at 3pm\""; return; }
       const deadlines = load();
-      deadlines.push({name, date: parsed});
+      deadlines.push({name: result.name, date: result.date});
       save(deadlines);
       render();
     }
+
+    function startEdit(card, idx) {
+      if (card.classList.contains("editing")) return;
+      card.classList.add("editing");
+      const deadlines = load();
+      const d = deadlines[idx];
+      const prev = card.innerHTML;
+      card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
+        + '<span class="inline-error" id="edit-error"></span>'
+        + '<div class="inline-actions"><button class="primary" id="edit-save">Save</button><button id="edit-cancel">Cancel</button><button class="danger" id="edit-delete">Delete</button></div>';
+      const input = document.getElementById("edit-input");
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
+      document.getElementById("edit-save").addEventListener("click", () => doEdit(idx));
+      document.getElementById("edit-cancel").addEventListener("click", () => render());
+      document.getElementById("edit-delete").addEventListener("click", () => { deadlines.splice(idx, 1); save(deadlines); render(); });
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") doEdit(idx); if (e.key === "Escape") render(); });
+      card.addEventListener("click", (e) => e.stopPropagation());
+    }
+
+    function doEdit(idx) {
+      const val = document.getElementById("edit-input").value.trim();
+      const err = document.getElementById("edit-error");
+      if (!val) { err.textContent = "Type a name and date"; return; }
+      const result = splitInput(val);
+      if (!result) { err.textContent = "Include a date: e.g. \"Report due May 30\""; return; }
+      const deadlines = load();
+      deadlines[idx] = {name: result.name, date: result.date};
+      save(deadlines);
+      render();
+    }
+
+    function escAttr(s) { return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
     function escHtml(s) {
       const d = document.createElement("div");
