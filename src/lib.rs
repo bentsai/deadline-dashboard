@@ -60,6 +60,11 @@ const PAGE: &[u8] = br##"<!doctype html>
     .card.urgent .label { color: rgba(255,255,255,.7); }
     .card.urgent .delete-btn { color: rgba(255,255,255,.5); }
     .card.urgent .delete-btn:hover { color: #fff; }
+    .card.urgent .inline-actions button { border-color: rgba(255,255,255,.5); color: rgba(255,255,255,.7); }
+    .card.urgent .inline-actions button:hover { border-color: #fff; color: #fff; }
+    .card.urgent .inline-actions button.danger:hover { border-color: #ffcc00; color: #ffcc00; }
+    .card.urgent .inline-input { border-color: rgba(255,255,255,.5); background: rgba(0,0,0,.3); color: #fff; }
+    .card.urgent .inline-input:focus { border-color: #fff; }
     .card.soon { background: #ffcc00; color: #000; border-color: #ffcc00; outline-color: #ffcc00; }
     .card.past { background: #333; color: #999; border-color: #333; outline-color: #555; }
     .card.past .card-days { color: #666; }
@@ -204,9 +209,9 @@ const PAGE: &[u8] = br##"<!doctype html>
     .now-card {
       background: #1a1a1a;
       color: #fff;
-      padding: 1.25rem;
+      padding: 2rem;
       border: 2px solid #333;
-      min-height: 100px;
+      min-height: 160px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -216,9 +221,9 @@ const PAGE: &[u8] = br##"<!doctype html>
     .now-card:hover { border-color: #ffcc00; }
     .now-card.editing { border-color: #fff; cursor: default; }
     .now-card .now-text {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 400;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     .now-card .inline-input { border-color: #555; background: #111; color: #fff; }
     .now-card .inline-input:focus { border-color: #ffcc00; }
