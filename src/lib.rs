@@ -1,5 +1,5 @@
 wit_bindgen::generate!({
-    world: "wasi:http/proxy@0.2.0",
+    world: "wasi:http/proxy@0.2.8",
     path: "wit",
     generate_all,
 });
@@ -15,7 +15,7 @@ const PAGE: &[u8] = br##"<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>DEADLINES</title>
+  <title>Deadline Dashboard</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
