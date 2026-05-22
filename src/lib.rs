@@ -224,6 +224,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       transition: border-color .15s;
     }
     .now-card:hover { border-color: #ffcc00; }
+    .now-card.dragging { opacity: .4; border-color: #ffcc00; }
+    .now-card.drag-over { border-color: #fff; border-style: dashed; }
     .now-card.editing { border-color: #fff; cursor: default; }
     .now-card .now-text {
       font-size: 2rem;
@@ -522,9 +524,16 @@ const PAGE: &[u8] = br##"<!doctype html>
         card.tabIndex = 0;
         card.setAttribute("role", "button");
         card.setAttribute("aria-label", c.text);
+        card.draggable = true;
+        card.dataset.idx = i;
         card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startNowEdit(card, i));
         card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startNowEdit(card, i); } });
+        card.addEventListener("dragstart", (e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", i); card.classList.add("dragging"); });
+        card.addEventListener("dragend", () => card.classList.remove("dragging"));
+        card.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; card.classList.add("drag-over"); });
+        card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+        card.addEventListener("drop", (e) => { e.preventDefault(); card.classList.remove("drag-over"); const from = parseInt(e.dataTransfer.getData("text/plain")); const to = i; if (from !== to) { const items = loadNow(); const moved = items.splice(from, 1)[0]; items.splice(to, 0, moved); saveNow(items); renderNow(); } });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
