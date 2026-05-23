@@ -338,6 +338,16 @@ const PAGE: &[u8] = br##"<!doctype html>
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
+      const bareDay = s.match(/^(\w+?)(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?$/);
+      if (bareDay && DAYS[bareDay[1]] !== undefined) {
+        const target = DAYS[bareDay[1]];
+        const d = new Date(now);
+        let diff = target - d.getDay();
+        if (diff <= 0) diff += 7;
+        d.setDate(d.getDate() + diff);
+        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
+      }
+
       for (const [name, idx] of Object.entries(MONTHS)) {
         const re = new RegExp(name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?");
         const m = s.match(re);
