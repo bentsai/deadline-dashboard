@@ -497,12 +497,12 @@ const PAGE: &[u8] = br##"<!doctype html>
         addCard.removeAttribute("role");
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
-        addCard.innerHTML = '<input class="inline-input" id="add-input" placeholder="Project proposal due June 15">'
-          + '<span class="inline-hint">Enter to save. Esc to cancel.</span>'
+        addCard.innerHTML = '<textarea class="inline-input" id="add-input" rows="2" placeholder="Project proposal due June 15"></textarea>'
+          + '<span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span>'
           + '<span class="inline-error" id="add-error"></span>';
         const input = document.getElementById("add-input");
         input.focus();
-        input.addEventListener("keydown", (e) => { if (e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
+        input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
         input.addEventListener("blur", () => { if (input.value.trim()) doAdd(); else render(); });
       }
       addCard.addEventListener("click", activateAdd);
@@ -541,9 +541,9 @@ const PAGE: &[u8] = br##"<!doctype html>
       deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
       const d = deadlines[idx];
       const origName = d.name, origDate = d.date;
-      card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
+      card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
         + '<span class="inline-error" id="edit-error"></span>'
-        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -560,7 +560,7 @@ const PAGE: &[u8] = br##"<!doctype html>
         render();
       }
       input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") trySave();
+        if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave();
         if (e.key === "Escape") render();
       });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
