@@ -39,7 +39,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
       gap: 1.5rem;
       margin-bottom: 2.5rem;
     }
@@ -75,14 +75,14 @@ const PAGE: &[u8] = br##"<!doctype html>
     .card.past .card-days { color: #666; }
     .card.past .label { color: #666; }
     .card-name {
-      font-size: 1.1rem;
+      font-size: 1.4rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .05em;
     }
     .card-date {
       font-family: "Rubik", sans-serif;
-      font-size: .85rem;
+      font-size: 1rem;
       font-weight: 400;
       color: #555;
     }
@@ -97,7 +97,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .label {
       display: block;
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .1em;
@@ -222,7 +222,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
     .now-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
       gap: 1.5rem;
     }
     .now-card {
