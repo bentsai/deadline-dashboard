@@ -284,19 +284,35 @@ const PAGE: &[u8] = br##"<!doctype html>
   <div class="now-grid" id="now-grid"></div>
   <script>
     let nowDragIdx = null;
+    function formatISOLocal(dt) {
+      const p = n => String(n).padStart(2, "0");
+      return dt.getFullYear() + "-" + p(dt.getMonth() + 1) + "-" + p(dt.getDate())
+        + "T" + p(dt.getHours()) + ":" + p(dt.getMinutes());
+    }
+
     function makeSeed() {
       const now = new Date();
-      const d = (offset, h, m) => { const dt = new Date(now); dt.setDate(dt.getDate() + offset); dt.setHours(h || 9, m || 0, 0, 0); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":"+p(dt.getMinutes()); };
-      const minsFromNow = (mins) => { const dt = new Date(now.getTime() + mins * 60000); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":"+p(dt.getMinutes()); };
+      function daysFromNow(days, hour) {
+        const dt = new Date(now);
+        dt.setDate(dt.getDate() + days);
+        dt.setHours(hour || 9, 0, 0, 0);
+        return formatISOLocal(dt);
+      }
       return [
-        {name:"Send contract to legal", date:minsFromNow(38)},
-        {name:"Submit quarterly report", date:d(0, now.getHours() + 4)},
-        {name:"Design review with team", date:d(5, 10)},
-        {name:"Launch blog post", date:d(14, 9)},
-        {name:"Renew domain registration", date:d(30, 9)}
+        {name: "Send contract to legal", date: formatISOLocal(new Date(now.getTime() + 38 * 60000))},
+        {name: "Submit quarterly report", date: daysFromNow(0, now.getHours() + 4)},
+        {name: "Design review with team", date: daysFromNow(5, 10)},
+        {name: "Launch blog post", date: daysFromNow(14, 9)},
+        {name: "Renew domain registration", date: daysFromNow(30, 9)}
       ];
     }
-    const NOW_SEED = [{text:"Prep talking points for 1:1"},{text:"Reply to Slack thread on launch plan"},{text:"Read RFC on new auth flow"}];
+
+    const NOW_SEED = [
+      {text: "Prep talking points for 1:1"},
+      {text: "Reply to Slack thread on launch plan"},
+      {text: "Read RFC on new auth flow"}
+    ];
+
     const KEY = "deadline-dashboard-v1";
     const NOW_KEY = "now-cards-v1";
 
@@ -307,22 +323,29 @@ const PAGE: &[u8] = br##"<!doctype html>
       save(seed);
       return seed;
     }
-    function save(deadlines) { localStorage.setItem(KEY, JSON.stringify(deadlines)); }
-    function loadNow() { const raw = localStorage.getItem(NOW_KEY); if (raw) return JSON.parse(raw); saveNow(NOW_SEED); return NOW_SEED; }
-    function saveNow(cards) { localStorage.setItem(NOW_KEY, JSON.stringify(cards)); }
 
-    function daysUntil(dateStr) {
-      const target = new Date(dateStr);
-      const now = new Date();
-      return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    function save(deadlines) {
+      localStorage.setItem(KEY, JSON.stringify(deadlines));
+    }
+
+    function loadNow() {
+      const raw = localStorage.getItem(NOW_KEY);
+      if (raw) return JSON.parse(raw);
+      saveNow(NOW_SEED);
+      return NOW_SEED;
+    }
+
+    function saveNow(cards) {
+      localStorage.setItem(NOW_KEY, JSON.stringify(cards));
     }
 
     function timeUntil(dateStr) {
       const ms = new Date(dateStr) - new Date();
-      if (ms <= 0) { const d = Math.abs(Math.ceil(ms / 86400000)); return {value: d, unit: "days ago"}; }
-      if (ms >= 86400000) { return {value: Math.ceil(ms / 86400000), unit: "days left"}; }
-      if (ms >= 3600000) { return {value: Math.ceil(ms / 3600000), unit: "hours left"}; }
-      return {value: Math.max(1, Math.ceil(ms / 60000)), unit: "minutes left"};
+      const days = Math.ceil(ms / 86400000);
+      if (ms <= 0) return {value: Math.abs(days), unit: "days ago", days};
+      if (ms >= 86400000) return {value: days, unit: "days left", days};
+      if (ms >= 3600000) return {value: Math.ceil(ms / 3600000), unit: "hours left", days: 0};
+      return {value: Math.max(1, Math.ceil(ms / 60000)), unit: "minutes left", days: 0};
     }
 
     const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
@@ -409,9 +432,7 @@ const PAGE: &[u8] = br##"<!doctype html>
     }
 
     function makeDate(y, m, d, h, min) {
-      const dt = new Date(y, m, d, h, min);
-      const pad = n => String(n).padStart(2, "0");
-      return dt.getFullYear() + "-" + pad(dt.getMonth()+1) + "-" + pad(dt.getDate()) + "T" + pad(dt.getHours()) + ":" + pad(dt.getMinutes());
+      return formatISOLocal(new Date(y, m, d, h, min));
     }
 
     function splitInput(str) {
@@ -463,9 +484,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       const grid = document.getElementById("grid");
       grid.innerHTML = "";
       deadlines.forEach((d, i) => {
-        const days = daysUntil(d.date);
-        const {cls, stamp} = urgency(days);
         const t = timeUntil(d.date);
+        const {cls, stamp} = urgency(t.days);
 
         const card = document.createElement("div");
         card.className = "card " + cls;
@@ -483,7 +503,11 @@ const PAGE: &[u8] = br##"<!doctype html>
           + '<div class="card-days">' + t.value + dot + '</div>'
           + '<span class="label">' + t.unit + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
-        card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startEdit(card, i); } });
+        card.addEventListener("keydown", (e) => {
+          if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault(); startEdit(card, i);
+          }
+        });
         grid.appendChild(card);
       });
 
@@ -502,11 +526,18 @@ const PAGE: &[u8] = br##"<!doctype html>
           + '<span class="inline-error" id="add-error"></span>';
         const input = document.getElementById("add-input");
         input.focus();
-        input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") doAdd(); if (e.key === "Escape") render(); });
-        input.addEventListener("blur", () => { if (input.value.trim()) doAdd(); else render(); });
+        input.addEventListener("keydown", (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doAdd();
+          if (e.key === "Escape") render();
+        });
+        input.addEventListener("blur", () => {
+          if (input.value.trim()) doAdd(); else render();
+        });
       }
       addCard.addEventListener("click", activateAdd);
-      addCard.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateAdd(); } });
+      addCard.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateAdd(); }
+      });
       grid.appendChild(addCard);
     }
 
@@ -631,11 +662,18 @@ const PAGE: &[u8] = br##"<!doctype html>
         addCard.innerHTML = '<textarea class="inline-input" id="now-add-input" rows="3" placeholder="What is top of mind?"></textarea>';
         const input = document.getElementById("now-add-input");
         input.focus();
-        input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") doNowAdd(); if (e.key === "Escape") renderNow(); });
-        input.addEventListener("blur", () => { if (input.value.trim()) doNowAdd(); else renderNow(); });
+        input.addEventListener("keydown", (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doNowAdd();
+          if (e.key === "Escape") renderNow();
+        });
+        input.addEventListener("blur", () => {
+          if (input.value.trim()) doNowAdd(); else renderNow();
+        });
       }
       addCard.addEventListener("click", activateNowAdd);
-      addCard.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateNowAdd(); } });
+      addCard.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateNowAdd(); }
+      });
       grid.appendChild(addCard);
     }
 
@@ -673,9 +711,19 @@ const PAGE: &[u8] = br##"<!doctype html>
         saveNow(cards);
         renderNow();
       }
-      input.addEventListener("keydown", (e) => { if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave(); if (e.key === "Escape") renderNow(); });
+      input.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") trySave();
+        if (e.key === "Escape") renderNow();
+      });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
-      document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saved = true; cards.splice(idx, 1); saveNow(cards); renderNow(); });
+      document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        saved = true;
+        cards.splice(idx, 1);
+        saveNow(cards);
+        renderNow();
+      });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
