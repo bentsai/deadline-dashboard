@@ -92,6 +92,8 @@ const PAGE: &[u8] = br##"<!doctype html>
       font-weight: 400;
       line-height: 1;
       letter-spacing: -.04em;
+      position: relative;
+      display: inline-block;
     }
     .label {
       display: block;
@@ -101,6 +103,18 @@ const PAGE: &[u8] = br##"<!doctype html>
       letter-spacing: .1em;
       color: #555;
     }
+    @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+    .blink-dot {
+      position: absolute;
+      top: .1em;
+      right: 0;
+      width: .18em;
+      height: .18em;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .blink-dot.hours { animation: blink 2s step-end infinite; }
+    .blink-dot.minutes { animation: blink 1s step-end infinite; }
     .add-card {
       background: transparent;
       border: 2px solid #333;
@@ -228,9 +242,9 @@ const PAGE: &[u8] = br##"<!doctype html>
     .now-card { transition: border-color .15s, transform .15s; }
     .now-card.editing { border-color: #fff; cursor: default; }
     .now-card .now-text {
-      font-size: 2rem;
+      font-size: 3rem;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.2;
       white-space: pre-line;
     }
     .now-card .inline-input { border-color: #555; background: #111; color: #fff; }
@@ -272,9 +286,11 @@ const PAGE: &[u8] = br##"<!doctype html>
     let nowDragIdx = null;
     function makeSeed() {
       const now = new Date();
-      const d = (offset, h) => { const dt = new Date(now); dt.setDate(dt.getDate() + offset); dt.setHours(h || 9, 0, 0, 0); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":00"; };
+      const d = (offset, h, m) => { const dt = new Date(now); dt.setDate(dt.getDate() + offset); dt.setHours(h || 9, m || 0, 0, 0); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":"+p(dt.getMinutes()); };
+      const minsFromNow = (mins) => { const dt = new Date(now.getTime() + mins * 60000); const p = n => String(n).padStart(2,"0"); return dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate())+"T"+p(dt.getHours())+":"+p(dt.getMinutes()); };
       return [
-        {name:"Submit quarterly report", date:d(1, 17)},
+        {name:"Send contract to legal", date:minsFromNow(38)},
+        {name:"Submit quarterly report", date:d(0, now.getHours() + 4)},
         {name:"Design review with team", date:d(5, 10)},
         {name:"Launch blog post", date:d(14, 9)},
         {name:"Renew domain registration", date:d(30, 9)}
@@ -299,6 +315,14 @@ const PAGE: &[u8] = br##"<!doctype html>
       const target = new Date(dateStr);
       const now = new Date();
       return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    }
+
+    function timeUntil(dateStr) {
+      const ms = new Date(dateStr) - new Date();
+      if (ms <= 0) { const d = Math.abs(Math.ceil(ms / 86400000)); return {value: d, unit: "days ago"}; }
+      if (ms >= 86400000) { return {value: Math.ceil(ms / 86400000), unit: "days left"}; }
+      if (ms >= 3600000) { return {value: Math.ceil(ms / 3600000), unit: "hours left"}; }
+      return {value: Math.max(1, Math.ceil(ms / 60000)), unit: "minutes left"};
     }
 
     const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
@@ -426,6 +450,13 @@ const PAGE: &[u8] = br##"<!doctype html>
       return d.name + " " + mo + " " + day + " " + year + time;
     }
 
+    function urgency(days) {
+      if (days < 0) return {cls: "past", stamp: '<span class="stamp">&#x2716;</span>'};
+      if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp">&#x26A0;</span>'};
+      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp">&#x2B23;</span>'};
+      return {cls: "ok", stamp: ""};
+    }
+
     function render() {
       const deadlines = load();
       deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -433,27 +464,24 @@ const PAGE: &[u8] = br##"<!doctype html>
       grid.innerHTML = "";
       deadlines.forEach((d, i) => {
         const days = daysUntil(d.date);
-        let cls = "ok";
-        if (days < 0) cls = "past";
-        else if (days <= 2) cls = "urgent";
-        else if (days <= 7) cls = "soon";
+        const {cls, stamp} = urgency(days);
+        const t = timeUntil(d.date);
 
         const card = document.createElement("div");
         card.className = "card " + cls;
         card.tabIndex = 0;
         card.setAttribute("role", "button");
-        card.setAttribute("aria-label", d.name + ", " + (days < 0 ? Math.abs(days) + " days ago" : days + " days left"));
+        card.setAttribute("aria-label", d.name + ", " + t.value + " " + t.unit);
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
-        let stamp = "";
-        if (days < 0) stamp = '<span class="stamp">&#x2716;</span>';
-        else if (days <= 2) stamp = '<span class="stamp">&#x26A0;</span>';
-        else if (days <= 7) stamp = '<span class="stamp">&#x2B23;</span>';
+        let dot = "";
+        if (t.unit === "hours left") dot = '<span class="blink-dot hours"></span>';
+        else if (t.unit === "minutes left") dot = '<span class="blink-dot minutes"></span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
-          + '<div class="card-days">' + (days < 0 ? Math.abs(days) : days) + '</div>'
-          + '<span class="label">' + (days < 0 ? "days ago" : "days left") + '</span>';
+          + '<div class="card-days">' + t.value + dot + '</div>'
+          + '<span class="label">' + t.unit + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
         card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startEdit(card, i); } });
         grid.appendChild(card);
@@ -482,7 +510,9 @@ const PAGE: &[u8] = br##"<!doctype html>
       grid.appendChild(addCard);
     }
 
+    let addingDeadline = false;
     function doAdd() {
+      if (addingDeadline) return;
       const input = document.getElementById("add-input");
       if (!input) return;
       const val = input.value.trim();
@@ -490,17 +520,27 @@ const PAGE: &[u8] = br##"<!doctype html>
       if (!val) { render(); return; }
       const result = splitInput(val);
       if (!result) { if (err) err.textContent = "Include a date, e.g. \"Report due May 30\""; return; }
+      addingDeadline = true;
       const deadlines = load();
       deadlines.push({name: result.name, date: result.date});
       save(deadlines);
       render();
+      addingDeadline = false;
+    }
+
+    function findDeadline(name, date) {
+      const all = load();
+      const ri = all.findIndex(x => x.name === name && x.date === date);
+      return {all, ri};
     }
 
     function startEdit(card, idx) {
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
       const deadlines = load();
+      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
       const d = deadlines[idx];
+      const origName = d.name, origDate = d.date;
       card.innerHTML = '<input class="inline-input" id="edit-input" value="' + escAttr(formatForEdit(d)) + '">'
         + '<span class="inline-error" id="edit-error"></span>'
         + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">delete</button></div>';
@@ -515,13 +555,22 @@ const PAGE: &[u8] = br##"<!doctype html>
         if (!val) { render(); return; }
         const result = splitInput(val);
         if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
-        deadlines[idx] = {name: result.name, date: result.date};
-        save(deadlines);
+        const {all, ri} = findDeadline(origName, origDate);
+        if (ri !== -1) { all[ri] = {name: result.name, date: result.date}; save(all); }
         render();
       }
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") trySave(); if (e.key === "Escape") render(); });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") trySave();
+        if (e.key === "Escape") render();
+      });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
-      document.getElementById("edit-delete").addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saved = true; deadlines.splice(idx, 1); save(deadlines); render(); });
+      document.getElementById("edit-delete").addEventListener("mousedown", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        saved = true;
+        const {all, ri} = findDeadline(origName, origDate);
+        if (ri !== -1) { all.splice(ri, 1); save(all); }
+        render();
+      });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
@@ -539,10 +588,34 @@ const PAGE: &[u8] = br##"<!doctype html>
         card.dataset.idx = i;
         card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startNowEdit(card, i));
-        card.addEventListener("keydown", (e) => { if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startNowEdit(card, i); } });
-        card.addEventListener("dragstart", (e) => { e.dataTransfer.effectAllowed = "move"; nowDragIdx = i; card.classList.add("dragging"); });
-        card.addEventListener("dragend", () => { card.classList.remove("dragging"); if (nowDragIdx !== null) { const els = [...grid.querySelectorAll(".now-card")]; const newOrder = els.map(el => parseInt(el.dataset.idx)); const items = loadNow(); const reordered = newOrder.map(idx => items[idx]); saveNow(reordered); nowDragIdx = null; renderNow(); } });
-        card.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; const dragging = grid.querySelector(".dragging"); if (dragging && dragging !== card) { const cards = [...grid.querySelectorAll(".now-card")]; const dragPos = cards.indexOf(dragging); const hoverPos = cards.indexOf(card); if (dragPos < hoverPos) { card.after(dragging); } else { card.before(dragging); } } });
+        card.addEventListener("keydown", (e) => {
+          if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault(); startNowEdit(card, i);
+          }
+        });
+        card.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "move";
+          nowDragIdx = i;
+          card.classList.add("dragging");
+        });
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          if (nowDragIdx === null) return;
+          const els = [...grid.querySelectorAll(".now-card")];
+          const reordered = els.map(el => loadNow()[parseInt(el.dataset.idx)]);
+          saveNow(reordered);
+          nowDragIdx = null;
+          renderNow();
+        });
+        card.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          const dragging = grid.querySelector(".dragging");
+          if (!dragging || dragging === card) return;
+          const all = [...grid.querySelectorAll(".now-card")];
+          if (all.indexOf(dragging) < all.indexOf(card)) card.after(dragging);
+          else card.before(dragging);
+        });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
@@ -566,15 +639,19 @@ const PAGE: &[u8] = br##"<!doctype html>
       grid.appendChild(addCard);
     }
 
+    let addingNow = false;
     function doNowAdd() {
+      if (addingNow) return;
       const input = document.getElementById("now-add-input");
       if (!input) return;
       const val = input.value.trim();
       if (!val) { renderNow(); return; }
+      addingNow = true;
       const cards = loadNow();
       cards.push({text: val});
       saveNow(cards);
       renderNow();
+      addingNow = false;
     }
 
     function startNowEdit(card, idx) {
