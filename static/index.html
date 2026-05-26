@@ -13,16 +13,16 @@
       --fg: #fff;
       --card-bg: #fff;
       --card-fg: #000;
-      --muted: #737373;
-      --muted-light: #8a8a8a;
-      --border-dim: #555;
-      --border-hover: #888;
+      --muted: #666;
+      --muted-light: #777;
+      --border-dim: #444;
+      --border-hover: #777;
       --accent: #ffcc00;
       --danger: #ff0000;
-      --urgent-bg: #ff0000;
+      --urgent-bg: #cc2200;
       --soon-bg: #ffcc00;
-      --past-bg: #2a2a2a;
-      --past-fg: #aaa;
+      --past-bg: #2e2e2e;
+      --past-fg: #999;
       --now-bg: #1a1a1a;
       --now-input-bg: #111;
       --card-min-h: 220px;
@@ -72,11 +72,11 @@
     .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
-      & .card-date { color: rgba(255,255,255,.85); }
-      & .label { color: rgba(255,255,255,.85); }
-      & .delete-btn { color: rgba(255,255,255,.75); }
+      & .card-date { color: rgba(255,255,255,.75); }
+      & .label { color: rgba(255,255,255,.75); }
+      & .delete-btn { color: rgba(255,255,255,.6); }
       & .delete-btn:hover { color: var(--fg); }
-      & .inline-actions button { color: rgba(255,255,255,.85); }
+      & .inline-actions button { color: rgba(255,255,255,.75); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
       & .inline-input { border-color: rgba(255,255,255,.6); color: var(--fg); }
@@ -179,7 +179,7 @@
       font-family: var(--font);
       font-size: .85rem;
       font-weight: 400;
-      color: #777;
+      color: #555;
     }
     .inline-error {
       font-family: var(--font);
@@ -220,6 +220,7 @@
     .card { cursor: pointer; transition: outline-color .1s; }
     .card:hover, .card:focus { outline-color: var(--accent); }
     .card:focus { outline-style: solid; }
+    .card.soon:hover, .card.soon:focus { outline-color: var(--fg); }
     .card.editing { outline-color: var(--fg); cursor: default; justify-content: center; }
     .now-card.editing { justify-content: center; }
     .now-card:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -276,7 +277,7 @@
     }
     .now-card .inline-input { border-color: var(--muted); background: var(--now-input-bg); color: var(--fg); }
     .now-card .inline-input:focus { border-color: var(--accent); }
-    .now-card .inline-actions button { border-color: var(--muted); color: #aaa; }
+    .now-card .inline-actions button { border-color: var(--muted); color: var(--past-fg); }
     .now-card .inline-actions button:hover { border-color: var(--fg); color: var(--fg); }
     .now-card .inline-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
     .now-add {
@@ -292,7 +293,7 @@
     }
     .now-add:hover { border-color: var(--muted); }
     .now-add .plus { font-size: 1rem; font-weight: 400; color: var(--muted); }
-    .now-add:hover .plus { color: var(--muted); }
+    .now-add:hover .plus { color: var(--muted-light); }
     .now-add.active {
       border-color: var(--fg);
       flex-direction: column;
