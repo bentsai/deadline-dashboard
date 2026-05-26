@@ -45,6 +45,7 @@
       margin-bottom: 2rem;
       border-bottom: 6px solid var(--fg);
       padding-bottom: 1rem;
+      text-wrap: balance;
     }
     .grid {
       display: grid;
@@ -69,25 +70,32 @@
     .card.urgent .stamp { opacity: .25; font-size: 14rem; }
     .card.soon .stamp { font-size: 12rem; }
     .card > *:not(.stamp) { position: relative; z-index: 1; }
-    .card.urgent { background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg); }
-    .card.urgent .card-date { color: rgba(255,255,255,.7); }
-    .card.urgent .label { color: rgba(255,255,255,.7); }
-    .card.urgent .delete-btn { color: rgba(255,255,255,.5); }
-    .card.urgent .delete-btn:hover { color: var(--fg); }
-    .card.urgent .inline-actions button { color: rgba(255,255,255,.6); }
-    .card.urgent .inline-actions button:hover { color: var(--fg); }
-    .card.urgent .inline-actions button.danger:hover { color: var(--accent); }
-    .card.urgent .inline-input { border-color: rgba(255,255,255,.4); color: var(--fg); }
-    .card.urgent .inline-input:focus { border-color: var(--fg); }
-    .card.soon { background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg); }
-    .card.past { background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted); }
-    .card.past .card-days { color: var(--muted-light); }
-    .card.past .label { color: var(--muted-light); }
+    .card.urgent {
+      background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
+      & .card-date { color: rgba(255,255,255,.7); }
+      & .label { color: rgba(255,255,255,.7); }
+      & .delete-btn { color: rgba(255,255,255,.5); }
+      & .delete-btn:hover { color: var(--fg); }
+      & .inline-actions button { color: rgba(255,255,255,.6); }
+      & .inline-actions button:hover { color: var(--fg); }
+      & .inline-actions button.danger:hover { color: var(--accent); }
+      & .inline-input { border-color: rgba(255,255,255,.4); color: var(--fg); }
+      & .inline-input:focus { border-color: var(--fg); }
+    }
+    .card.soon {
+      background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
+    }
+    .card.past {
+      background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted);
+      & .card-days { color: var(--muted-light); }
+      & .label { color: var(--muted-light); }
+    }
     .card-name {
       font-size: 1.4rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .05em;
+      text-wrap: balance;
     }
     .card-date {
       font-family: var(--font);
@@ -124,6 +132,9 @@
     }
     .blink-dot.hours { animation: blink 2s step-end infinite; }
     .blink-dot.minutes { animation: blink 1s step-end infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .blink-dot { animation: none; }
+    }
     .add-card {
       background: transparent;
       border: 2px solid var(--border-dim);
@@ -166,7 +177,7 @@
     .inline-input:focus { outline: none; border-color: var(--fg); }
     .inline-hint {
       font-family: var(--font);
-      font-size: .7rem;
+      font-size: .85rem;
       font-weight: 400;
       color: #444;
     }
@@ -182,24 +193,30 @@
       border: none;
       background: transparent;
       color: var(--muted);
-      font: 400 .8rem var(--font);
+      font: 400 .95rem var(--font);
       cursor: pointer;
       text-decoration: underline;
+      min-height: 44px;
+      min-width: 44px;
     }
     .inline-actions button:hover { color: var(--fg); }
     .inline-actions button.danger { color: var(--muted-light); }
     .inline-actions button.danger:hover { color: var(--danger); text-decoration: underline; }
-    .card.ok .inline-actions button { color: var(--past-fg); }
-    .card.ok .inline-actions button:hover { color: var(--card-fg); }
-    .card.ok .inline-actions button.danger:hover { color: var(--danger); }
-    .card.ok .inline-input { border-color: #ccc; color: var(--card-fg); }
-    .card.ok .inline-input:focus { border-color: var(--card-fg); }
-    .card.ok .inline-error { color: var(--danger); }
-    .card.soon .inline-actions button { color: var(--muted-light); }
-    .card.soon .inline-actions button:hover { color: var(--card-fg); }
-    .card.soon .inline-actions button.danger:hover { color: var(--danger); }
-    .card.soon .inline-input { border-color: var(--past-fg); color: var(--card-fg); }
-    .card.soon .inline-input:focus { border-color: var(--card-fg); }
+    .card.ok {
+      & .inline-actions button { color: var(--past-fg); }
+      & .inline-actions button:hover { color: var(--card-fg); }
+      & .inline-actions button.danger:hover { color: var(--danger); }
+      & .inline-input { border-color: #ccc; color: var(--card-fg); }
+      & .inline-input:focus { border-color: var(--card-fg); }
+      & .inline-error { color: var(--danger); }
+    }
+    .card.soon {
+      & .inline-actions button { color: var(--muted-light); }
+      & .inline-actions button:hover { color: var(--card-fg); }
+      & .inline-actions button.danger:hover { color: var(--danger); }
+      & .inline-input { border-color: var(--past-fg); color: var(--card-fg); }
+      & .inline-input:focus { border-color: var(--card-fg); }
+    }
     .card { cursor: pointer; transition: outline-color .1s; }
     .card:hover, .card:focus { outline-color: var(--accent); }
     .card:focus { outline-style: solid; }
@@ -228,6 +245,7 @@
       margin-bottom: 2rem;
       padding-bottom: 1rem;
       border-bottom: 6px solid var(--fg);
+      text-wrap: balance;
     }
     .now-grid {
       display: grid;
