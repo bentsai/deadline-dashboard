@@ -362,46 +362,36 @@
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
-      const nextDay = s.match(/^next\s+(\w+)/);
-      if (nextDay && DAYS[nextDay[1]] !== undefined) {
-        const target = DAYS[nextDay[1]];
+      function nextWeekday(dayName) {
+        const target = DAYS[dayName];
+        if (target === undefined) return null;
         const d = new Date(now);
         let diff = target - d.getDay();
         if (diff <= 0) diff += 7;
         d.setDate(d.getDate() + diff);
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
+
+      const nextDay = s.match(/^next\s+(\w+)/);
+      if (nextDay) { const r = nextWeekday(nextDay[1]); if (r) return r; }
 
       const bareDay = s.match(/^(\w+?)(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?$/);
-      if (bareDay && DAYS[bareDay[1]] !== undefined) {
-        const target = DAYS[bareDay[1]];
-        const d = new Date(now);
-        let diff = target - d.getDay();
-        if (diff <= 0) diff += 7;
-        d.setDate(d.getDate() + diff);
-        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
-      }
+      if (bareDay) { const r = nextWeekday(bareDay[1]); if (r) return r; }
 
       for (const [name, idx] of Object.entries(MONTHS)) {
-        const re = new RegExp(name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?");
-        const m = s.match(re);
-        if (m) {
-          const day = parseInt(m[1]);
-          let year = m[2] ? parseInt(m[2]) : now.getFullYear();
-          const candidate = new Date(year, idx, day);
-          if (candidate < now && !m[2]) year++;
-          if (!hasTime) { hour = 9; min = 0; }
-          return makeDate(year, idx, day, hour, min);
-        }
-        const re2 = new RegExp("(\\d{1,2})\\s+" + name + "(?:[,\\s]+(\\d{4}))?");
-        const m2 = s.match(re2);
-        if (m2) {
-          const day = parseInt(m2[1]);
-          let year = m2[2] ? parseInt(m2[2]) : now.getFullYear();
-          const candidate = new Date(year, idx, day);
-          if (candidate < now && !m2[2]) year++;
-          if (!hasTime) { hour = 9; min = 0; }
-          return makeDate(year, idx, day, hour, min);
+        const patterns = [
+          new RegExp(name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?"),
+          new RegExp("(\\d{1,2})\\s+" + name + "(?:[,\\s]+(\\d{4}))?")
+        ];
+        for (const re of patterns) {
+          const m = s.match(re);
+          if (m) {
+            const day = parseInt(m[1]);
+            let year = m[2] ? parseInt(m[2]) : now.getFullYear();
+            if (new Date(year, idx, day) < now && !m[2]) year++;
+            if (!hasTime) { hour = 9; min = 0; }
+            return makeDate(year, idx, day, hour, min);
+          }
         }
       }
 
