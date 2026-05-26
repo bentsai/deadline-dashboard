@@ -13,16 +13,16 @@
       --fg: #fff;
       --card-bg: #fff;
       --card-fg: #000;
-      --muted: #555;
-      --muted-light: #666;
-      --border-dim: #333;
-      --border-hover: #666;
+      --muted: #737373;
+      --muted-light: #8a8a8a;
+      --border-dim: #555;
+      --border-hover: #888;
       --accent: #ffcc00;
       --danger: #ff0000;
       --urgent-bg: #ff0000;
       --soon-bg: #ffcc00;
-      --past-bg: #333;
-      --past-fg: #999;
+      --past-bg: #2a2a2a;
+      --past-fg: #aaa;
       --now-bg: #1a1a1a;
       --now-input-bg: #111;
       --card-min-h: 220px;
@@ -72,14 +72,14 @@
     .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
-      & .card-date { color: rgba(255,255,255,.7); }
-      & .label { color: rgba(255,255,255,.7); }
-      & .delete-btn { color: rgba(255,255,255,.5); }
+      & .card-date { color: rgba(255,255,255,.85); }
+      & .label { color: rgba(255,255,255,.85); }
+      & .delete-btn { color: rgba(255,255,255,.75); }
       & .delete-btn:hover { color: var(--fg); }
-      & .inline-actions button { color: rgba(255,255,255,.6); }
+      & .inline-actions button { color: rgba(255,255,255,.85); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
-      & .inline-input { border-color: rgba(255,255,255,.4); color: var(--fg); }
+      & .inline-input { border-color: rgba(255,255,255,.6); color: var(--fg); }
       & .inline-input:focus { border-color: var(--fg); }
     }
     .card.soon {
@@ -179,7 +179,7 @@
       font-family: var(--font);
       font-size: .85rem;
       font-weight: 400;
-      color: #444;
+      color: #777;
     }
     .inline-error {
       font-family: var(--font);
@@ -276,7 +276,7 @@
     }
     .now-card .inline-input { border-color: var(--muted); background: var(--now-input-bg); color: var(--fg); }
     .now-card .inline-input:focus { border-color: var(--accent); }
-    .now-card .inline-actions button { border-color: var(--muted); color: #888; }
+    .now-card .inline-actions button { border-color: var(--muted); color: #aaa; }
     .now-card .inline-actions button:hover { border-color: var(--fg); color: var(--fg); }
     .now-card .inline-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
     .now-add {
@@ -291,7 +291,7 @@
       transition: border-color .15s;
     }
     .now-add:hover { border-color: var(--muted); }
-    .now-add .plus { font-size: 1rem; font-weight: 400; color: var(--border-dim); }
+    .now-add .plus { font-size: 1rem; font-weight: 400; color: var(--muted); }
     .now-add:hover .plus { color: var(--muted); }
     .now-add.active {
       border-color: var(--fg);
