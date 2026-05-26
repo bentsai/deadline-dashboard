@@ -287,7 +287,7 @@
       }
       return [
         {name: "Send contract to legal", date: formatISOLocal(new Date(now.getTime() + 38 * 60000))},
-        {name: "Submit quarterly report", date: daysFromNow(0, now.getHours() + 4)},
+        {name: "Submit quarterly report", date: formatISOLocal(new Date(now.getTime() + 4 * 3600000))},
         {name: "Design review with team", date: daysFromNow(5, 10)},
         {name: "Launch blog post", date: daysFromNow(14, 9)},
         {name: "Renew domain registration", date: daysFromNow(30, 9)}
@@ -713,8 +713,6 @@
       });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
-
-    function escAttr(s) { return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
     function escHtml(s) {
       const d = document.createElement("div");
