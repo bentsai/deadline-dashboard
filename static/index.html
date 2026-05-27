@@ -142,7 +142,7 @@
       margin-left: -.24em;
       animation: blink 2s step-end infinite;
     }
-    .blink-colon.minutes { animation-duration: 1s; }
+    .blink-colon.minutes { animation-duration: 1s; margin-left: -.3em; margin-right: -.24em; }
     @media (prefers-reduced-motion: reduce) {
       .blink-colon { animation: none; }
     }
@@ -394,11 +394,12 @@
         return formatISOLocal(dt);
       }
       return [
+        {name: "Submit quarterly report", date: daysFromNow(-2, 17)},
         {name: "Send contract to legal", date: formatISOLocal(new Date(now.getTime() + 38 * 60000))},
-        {name: "Submit quarterly report", date: formatISOLocal(new Date(now.getTime() + 4 * 3600000))},
-        {name: "Design review with team", date: daysFromNow(5, 10)},
-        {name: "Launch blog post", date: daysFromNow(14, 9)},
-        {name: "Renew domain registration", date: daysFromNow(30, 9)}
+        {name: "Design review with team", date: daysFromNow(1, 10)},
+        {name: "Launch blog post", date: daysFromNow(5, 9)},
+        {name: "Renew domain registration", date: daysFromNow(30, 9)},
+        {name: "Ship v2 API docs", date: daysFromNow(-5, 9), done: true, doneAt: new Date(now.getTime() - 3 * 86400000).toISOString()}
       ];
     }
 
@@ -609,12 +610,12 @@
           number = t.value;
         }
         card.setAttribute("aria-label", d.name + ", " + (d.done ? label : t.value + " " + t.unit));
-        let colon = "";
-        if (!d.done && t.unit === "hours left") colon = '<span class="blink-colon">:</span>';
-        else if (!d.done && t.unit === "minutes left") colon = '<span class="blink-colon minutes">:</span>';
+        let colonBefore = "", colonAfter = "";
+        if (!d.done && t.unit === "hours left") colonAfter = '<span class="blink-colon">:</span>';
+        else if (!d.done && t.unit === "minutes left") colonBefore = '<span class="blink-colon minutes">:</span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
-          + '<div class="card-days">' + number + colon + '</div>'
+          + '<div class="card-days">' + colonBefore + number + colonAfter + '</div>'
           + '<span class="label">' + label + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
         card.addEventListener("keydown", (e) => {
