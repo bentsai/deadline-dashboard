@@ -23,6 +23,7 @@
       --soon-bg: #ffcc00;
       --past-bg: #2e2e2e;
       --past-fg: #999;
+      --done-bg: #1a7a3a;
       --now-bg: #1a1a1a;
       --now-input-bg: #111;
       --card-min-h: 220px;
@@ -92,6 +93,12 @@
       background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted);
       & .card-days { color: var(--muted-light); }
       & .label { color: var(--muted-light); }
+    }
+    .card.done {
+      background: var(--done-bg); color: var(--fg); border-color: var(--done-bg); outline-color: var(--done-bg);
+      & .card-date { color: rgba(255,255,255,.75); }
+      & .label { color: rgba(255,255,255,.75); }
+      & .card-name { text-decoration: line-through; text-decoration-thickness: 3px; }
     }
     .card-name {
       font-size: 1.4rem;
@@ -198,6 +205,8 @@
       min-width: 44px;
     }
     .inline-actions button:hover { color: var(--fg); }
+    .inline-actions button.done-btn { color: var(--done-bg); }
+    .inline-actions button.done-btn:hover { color: #2da653; }
     .inline-actions button.danger { color: var(--muted-light); }
     .inline-actions button.danger:hover { color: var(--danger); text-decoration: underline; }
     .card.ok {
@@ -554,7 +563,8 @@
       return d.name + " " + mo + " " + day + " " + year + time;
     }
 
-    function urgency(days) {
+    function urgency(days, done) {
+      if (done) return {cls: "done", stamp: '<span class="stamp">&#x2605;&#xFE0E;</span>'};
       if (days < 0) return {cls: "past", stamp: '<span class="stamp">&#x2716;</span>'};
       if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp">&#x26A0;</span>'};
       if (days <= 7) return {cls: "soon", stamp: '<span class="stamp">&#x231B;&#xFE0E;</span>'};
@@ -563,28 +573,30 @@
 
     function render() {
       const deadlines = load();
-      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
+      deadlines.sort((a, b) => (a.done||false) - (b.done||false) || new Date(a.date) - new Date(b.date));
       const grid = document.getElementById("grid");
       grid.innerHTML = "";
       deadlines.forEach((d, i) => {
         const t = timeUntil(d.date);
-        const {cls, stamp} = urgency(t.days);
+        const {cls, stamp} = urgency(t.days, d.done);
 
         const card = document.createElement("div");
         card.className = "card " + cls;
         card.tabIndex = 0;
         card.setAttribute("role", "button");
-        card.setAttribute("aria-label", d.name + ", " + t.value + " " + t.unit);
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
+        const label = d.done ? "done" : t.unit;
+        const number = d.done ? "&#x2713;&#xFE0E;" : t.value;
+        card.setAttribute("aria-label", d.name + ", " + (d.done ? "done" : t.value + " " + t.unit));
         let colon = "";
-        if (t.unit === "hours left") colon = '<span class="blink-colon">:</span>';
-        else if (t.unit === "minutes left") colon = '<span class="blink-colon minutes">:</span>';
+        if (!d.done && t.unit === "hours left") colon = '<span class="blink-colon">:</span>';
+        else if (!d.done && t.unit === "minutes left") colon = '<span class="blink-colon minutes">:</span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
-          + '<div class="card-days">' + t.value + colon + '</div>'
-          + '<span class="label">' + t.unit + '</span>';
+          + '<div class="card-days">' + number + colon + '</div>'
+          + '<span class="label">' + label + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
         card.addEventListener("keydown", (e) => {
           if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
@@ -655,12 +667,12 @@
       card.classList.add("editing");
       card.removeAttribute("role");
       const deadlines = load();
-      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
+      deadlines.sort((a, b) => (a.done||false) - (b.done||false) || new Date(a.date) - new Date(b.date));
       const d = deadlines[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
         + '<span class="inline-error" id="edit-error"></span>'
-        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -682,6 +694,13 @@
         if (e.key === "Escape") render();
       });
       input.addEventListener("blur", () => setTimeout(trySave, 100));
+      document.getElementById("edit-done").addEventListener("mousedown", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        saved = true;
+        const {all, ri} = findDeadline(origName, origDate);
+        if (ri !== -1) { all[ri].done = !d.done; save(all); }
+        render();
+      });
       document.getElementById("edit-delete").addEventListener("mousedown", (e) => {
         e.preventDefault(); e.stopPropagation();
         saved = true;
