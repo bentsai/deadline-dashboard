@@ -1,5 +1,2 @@
 name = "deadline-dashboard"
 runtime = "wasm"
-
-[things]
-tool_slug = "deadline-dashboard"
