@@ -719,8 +719,8 @@
         card.addEventListener("dragend", () => {
           card.classList.remove("dragging");
           if (nowDragIdx === null) return;
-          const els = [...grid.querySelectorAll(".now-card")];
-          const reordered = els.map(el => loadNow()[parseInt(el.dataset.idx)]);
+          const current = loadNow();
+          const reordered = [...grid.querySelectorAll(".now-card")].map(el => current[parseInt(el.dataset.idx)]);
           saveNow(reordered);
           nowDragIdx = null;
           renderNow();
