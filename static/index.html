@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #000;
@@ -29,6 +29,7 @@
       --grid-min: 380px;
       --font: "Rubik", sans-serif;
       --font-mono: "Rubik Mono One", monospace;
+      --font-scratch: "IBM Plex Mono", monospace;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -51,7 +52,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
       gap: 1.5rem;
-      margin-bottom: 2.5rem;
     }
     .card {
       background: var(--card-bg);
@@ -64,11 +64,14 @@
       gap: .75rem;
       min-height: var(--card-min-h);
       justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: outline-color .1s;
     }
-    .card { position: relative; overflow: hidden; }
     .card .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-size: 14rem; line-height: 1; pointer-events: none; opacity: .15; z-index: 0; }
-    .card.urgent .stamp { opacity: .25; font-size: 14rem; }
-    .card.soon .stamp { font-size: 12rem; }
+    .card.urgent .stamp { opacity: .25; }
+    .card.soon .stamp { font-size: 16rem; }
     .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
@@ -121,19 +124,13 @@
       color: var(--muted);
     }
     @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
-    .blink-dot {
-      position: absolute;
-      top: .1em;
-      right: 0;
-      width: .18em;
-      height: .18em;
-      border-radius: 50%;
-      background: currentColor;
+    .blink-colon {
+      margin-left: -.24em;
+      animation: blink 2s step-end infinite;
     }
-    .blink-dot.hours { animation: blink 2s step-end infinite; }
-    .blink-dot.minutes { animation: blink 1s step-end infinite; }
+    .blink-colon.minutes { animation-duration: 1s; }
     @media (prefers-reduced-motion: reduce) {
-      .blink-dot { animation: none; }
+      .blink-colon { animation: none; }
     }
     .add-card {
       background: transparent;
@@ -179,7 +176,7 @@
       font-family: var(--font);
       font-size: .85rem;
       font-weight: 400;
-      color: #555;
+      color: var(--muted);
     }
     .inline-error {
       font-family: var(--font);
@@ -217,7 +214,6 @@
       & .inline-input { border-color: var(--past-fg); color: var(--card-fg); }
       & .inline-input:focus { border-color: var(--card-fg); }
     }
-    .card { cursor: pointer; transition: outline-color .1s; }
     .card:hover, .card:focus { outline-color: var(--accent); }
     .card:focus { outline-style: solid; }
     .card.soon:hover, .card.soon:focus { outline-color: var(--fg); }
@@ -242,11 +238,44 @@
       font-size: 3rem;
       text-transform: uppercase;
       letter-spacing: .1em;
-      margin-top: 3rem;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
       border-bottom: 6px solid var(--fg);
       text-wrap: balance;
+    }
+    .bottom-sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .today-section {
+      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+    }
+    .now-section {
+      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    #today-text {
+      flex: 1;
+      min-height: 300px;
+      font-family: var(--font-scratch);
+      font-size: 2rem;
+      background: var(--now-bg);
+      color: var(--fg);
+      border: 2px solid var(--border-dim);
+      padding: 1.5rem;
+      resize: none;
+      line-height: 1.6;
+    }
+    #today-text::placeholder { color: var(--muted); }
+    #today-text:focus { outline: none; border-color: var(--accent); }
+    @media (max-width: 900px) {
+      .today-section, .now-section { grid-column: 1 / -1; }
     }
     .now-grid {
       display: grid;
@@ -258,16 +287,16 @@
       color: var(--fg);
       padding: 2rem;
       border: 2px solid var(--border-dim);
+      cursor: pointer;
       min-height: var(--card-min-h);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      cursor: pointer;
-      transition: border-color .15s;
+      position: relative;
+      transition: border-color .15s, transform .15s;
     }
     .now-card:hover { border-color: var(--accent); }
     .now-card.dragging { opacity: .3; transform: scale(.95); }
-    .now-card { transition: border-color .15s, transform .15s; }
     .now-card.editing { border-color: var(--fg); cursor: default; }
     .now-card .now-text {
       font-size: 3rem;
@@ -303,13 +332,35 @@
       cursor: default;
       padding: 1.25rem;
     }
+    .export-bar {
+      margin-top: 3rem;
+      text-align: right;
+    }
+    .export-bar button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font: 400 .85rem var(--font);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .export-bar button:hover { color: var(--fg); }
   </style>
 </head>
 <body>
   <h1>Deadlines</h1>
   <div class="grid" id="grid"></div>
-  <h2>Now</h2>
-  <div class="now-grid" id="now-grid"></div>
+  <div class="bottom-sections">
+    <section class="today-section">
+      <h2>Today</h2>
+      <textarea id="today-text" placeholder="Scratch space..."></textarea>
+    </section>
+    <section class="now-section">
+      <h2>Now</h2>
+      <div class="now-grid" id="now-grid"></div>
+    </section>
+  </div>
+  <footer class="export-bar"><button id="export-btn">export</button></footer>
   <script>
     let nowDragIdx = null;
     function formatISOLocal(dt) {
@@ -367,6 +418,10 @@
       localStorage.setItem(NOW_KEY, JSON.stringify(cards));
     }
 
+    const TODAY_KEY = "today-text-v1";
+    function loadToday() { return localStorage.getItem(TODAY_KEY) || ""; }
+    function saveToday(text) { localStorage.setItem(TODAY_KEY, text); }
+
     function timeUntil(dateStr) {
       const ms = new Date(dateStr) - new Date();
       const days = Math.ceil(ms / 86400000);
@@ -410,6 +465,15 @@
         let diff = target - d.getDay();
         if (diff <= 0) diff += 7;
         d.setDate(d.getDate() + diff);
+        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
+      }
+
+      if (s === "next week" || s.startsWith("next week ")) {
+        const d = new Date(now);
+        let diff = 1 - d.getDay();
+        if (diff <= 0) diff += 7;
+        d.setDate(d.getDate() + diff);
+        if (!hasTime) { hour = 10; min = 0; }
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
@@ -492,7 +556,7 @@
     function urgency(days) {
       if (days < 0) return {cls: "past", stamp: '<span class="stamp">&#x2716;</span>'};
       if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp">&#x26A0;</span>'};
-      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp">&#x2B23;</span>'};
+      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp">&#x231B;&#xFE0E;</span>'};
       return {cls: "ok", stamp: ""};
     }
 
@@ -513,12 +577,12 @@
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
-        let dot = "";
-        if (t.unit === "hours left") dot = '<span class="blink-dot hours"></span>';
-        else if (t.unit === "minutes left") dot = '<span class="blink-dot minutes"></span>';
+        let colon = "";
+        if (t.unit === "hours left") colon = '<span class="blink-colon">:</span>';
+        else if (t.unit === "minutes left") colon = '<span class="blink-colon minutes">:</span>';
         card.innerHTML = stamp + '<div style="display:flex;align-items:start"><span class="card-name">' + escHtml(d.name) + '</span></div>'
           + '<div class="card-date">' + escHtml(formatted + " at " + timeStr) + '</div>'
-          + '<div class="card-days">' + t.value + dot + '</div>'
+          + '<div class="card-days">' + t.value + colon + '</div>'
           + '<span class="label">' + t.unit + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
         card.addEventListener("keydown", (e) => {
@@ -536,6 +600,7 @@
       addCard.setAttribute("aria-label", "Add new deadline");
       addCard.innerHTML = '<span class="plus">+ new deadline</span>';
       function activateAdd() {
+        if (addCard.classList.contains("active")) return;
         addCard.removeAttribute("role");
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
@@ -545,6 +610,7 @@
         const input = document.getElementById("add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
+          e.stopPropagation();
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doAdd();
           if (e.key === "Escape") render();
         });
@@ -586,6 +652,7 @@
     function startEdit(card, idx) {
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
+      card.removeAttribute("role");
       const deadlines = load();
       deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
       const d = deadlines[idx];
@@ -609,6 +676,7 @@
         render();
       }
       input.addEventListener("keydown", (e) => {
+        e.stopPropagation();
         if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave();
         if (e.key === "Escape") render();
       });
@@ -751,9 +819,37 @@
       return d.innerHTML;
     }
 
+    if (location.hash.startsWith("#data=")) {
+      try {
+        const json = atob(location.hash.slice(6));
+        const data = JSON.parse(json);
+        if (data.deadlines) save(data.deadlines);
+        if (data.now) saveNow(data.now);
+        if (data.today) saveToday(data.today);
+      } catch(e) { console.warn("Failed to import data from URL hash", e); }
+      history.replaceState(null, "", location.pathname);
+    }
+
     render();
     renderNow();
     setInterval(() => { render(); renderNow(); }, 60000);
+
+    const todayEl = document.getElementById("today-text");
+    todayEl.value = loadToday();
+    let todayTimer = null;
+    todayEl.addEventListener("input", () => {
+      clearTimeout(todayTimer);
+      todayTimer = setTimeout(() => saveToday(todayEl.value), 300);
+    });
+
+    document.getElementById("export-btn").addEventListener("click", function() {
+      const data = { deadlines: load(), now: loadNow(), today: loadToday() };
+      const url = location.origin + location.pathname + "#data=" + btoa(JSON.stringify(data));
+      navigator.clipboard.writeText(url).then(() => {
+        this.textContent = "copied!";
+        setTimeout(() => { this.textContent = "export"; }, 2000);
+      });
+    });
   </script>
 </body>
 </html>
