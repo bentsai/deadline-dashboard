@@ -577,9 +577,16 @@
       return {cls: "ok", stamp: ""};
     }
 
+    function formatDoneLabel(iso) {
+      const da = new Date(iso);
+      const date = da.toLocaleDateString(undefined, {month:"short", day:"numeric"}).toLowerCase();
+      const time = da.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"}).toLowerCase();
+      return "done " + date + " at " + time;
+    }
+
     function render() {
       const deadlines = load();
-      deadlines.sort((a, b) => (a.done||false) - (b.done||false) || new Date(a.date) - new Date(b.date));
+      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
       const grid = document.getElementById("grid");
       grid.innerHTML = "";
       deadlines.forEach((d, i) => {
@@ -593,9 +600,15 @@
         const dateObj = new Date(d.date);
         const formatted = dateObj.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"});
         const timeStr = dateObj.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
-        const label = d.done ? "done" : t.unit;
-        const number = d.done ? "&#x2713;&#xFE0E;" : t.value;
-        card.setAttribute("aria-label", d.name + ", " + (d.done ? "done" : t.value + " " + t.unit));
+        let label, number;
+        if (d.done) {
+          number = "&#x2713;&#xFE0E;";
+          label = d.doneAt ? formatDoneLabel(d.doneAt) : "done";
+        } else {
+          label = t.unit;
+          number = t.value;
+        }
+        card.setAttribute("aria-label", d.name + ", " + (d.done ? label : t.value + " " + t.unit));
         let colon = "";
         if (!d.done && t.unit === "hours left") colon = '<span class="blink-colon">:</span>';
         else if (!d.done && t.unit === "minutes left") colon = '<span class="blink-colon minutes">:</span>';
@@ -673,7 +686,7 @@
       card.classList.add("editing");
       card.removeAttribute("role");
       const deadlines = load();
-      deadlines.sort((a, b) => (a.done||false) - (b.done||false) || new Date(a.date) - new Date(b.date));
+      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
       const d = deadlines[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
@@ -691,7 +704,7 @@
         const result = splitInput(val);
         if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
         const {all, ri} = findDeadline(origName, origDate);
-        if (ri !== -1) { all[ri] = {name: result.name, date: result.date, done: all[ri].done}; save(all); }
+        if (ri !== -1) { all[ri] = {name: result.name, date: result.date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
         render();
       }
       input.addEventListener("keydown", (e) => {
@@ -704,7 +717,12 @@
         e.preventDefault(); e.stopPropagation();
         saved = true;
         const {all, ri} = findDeadline(origName, origDate);
-        if (ri !== -1) { all[ri].done = !d.done; save(all); }
+        if (ri !== -1) {
+          all[ri].done = !d.done;
+          if (all[ri].done) all[ri].doneAt = new Date().toISOString();
+          else delete all[ri].doneAt;
+          save(all);
+        }
         render();
       });
       document.getElementById("edit-delete").addEventListener("mousedown", (e) => {
@@ -824,6 +842,7 @@
         renderNow();
       }
       input.addEventListener("keydown", (e) => {
+        e.stopPropagation();
         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") trySave();
         if (e.key === "Escape") renderNow();
       });
@@ -858,7 +877,9 @@
 
     render();
     renderNow();
-    setInterval(() => { render(); renderNow(); }, 60000);
+    setInterval(() => {
+      if (!document.querySelector(".editing")) { render(); renderNow(); }
+    }, 60000);
 
     const todayEl = document.getElementById("today-text");
     todayEl.value = loadToday();
