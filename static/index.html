@@ -99,6 +99,12 @@
       & .card-date { color: rgba(255,255,255,.75); }
       & .label { color: rgba(255,255,255,.75); }
       & .card-name { text-decoration: line-through; text-decoration-thickness: 3px; }
+      & .inline-hint { color: rgba(255,255,255,.6); }
+      & .inline-actions button { color: rgba(255,255,255,.75); }
+      & .inline-actions button:hover { color: var(--fg); }
+      & .inline-actions button.danger:hover { color: var(--accent); }
+      & .inline-input { border-color: rgba(255,255,255,.6); color: var(--fg); }
+      & .inline-input:focus { border-color: var(--fg); }
     }
     .card-name {
       font-size: 1.4rem;
@@ -685,7 +691,7 @@
         const result = splitInput(val);
         if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
         const {all, ri} = findDeadline(origName, origDate);
-        if (ri !== -1) { all[ri] = {name: result.name, date: result.date}; save(all); }
+        if (ri !== -1) { all[ri] = {name: result.name, date: result.date, done: all[ri].done}; save(all); }
         render();
       }
       input.addEventListener("keydown", (e) => {
