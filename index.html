@@ -78,8 +78,6 @@
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
       & .card-date { color: rgba(255,255,255,.75); }
       & .label { color: rgba(255,255,255,.75); }
-      & .delete-btn { color: rgba(255,255,255,.6); }
-      & .delete-btn:hover { color: var(--fg); }
       & .inline-actions button { color: rgba(255,255,255,.75); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
@@ -237,18 +235,6 @@
     .now-card:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
     .add-card:focus { border-color: var(--border-hover); outline: 2px solid var(--accent); outline-offset: 2px; }
     .now-add:focus { border-color: var(--muted); outline: 2px solid var(--accent); outline-offset: 2px; }
-    .delete-btn {
-      background: none;
-      border: none;
-      color: var(--past-fg);
-      font-size: 1.5rem;
-      font-weight: 900;
-      cursor: pointer;
-      padding: 0 .5rem;
-      line-height: 1;
-      margin-left: auto;
-    }
-    .delete-btn:hover { color: var(--danger); }
     h2 {
       font-size: 3rem;
       text-transform: uppercase;
