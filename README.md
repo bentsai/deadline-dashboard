@@ -10,14 +10,13 @@ This is not meant for task breakdowns or managing projects. No notifications. No
 
 ## Running
 
-Requires [wasmtime](https://wasmtime.dev/) and a Rust toolchain with the `wasm32-wasip2` target.
+Open `index.html` in your browser. That's it — no build step, no server required.
+
+Or serve it locally:
 
 ```sh
-cargo build --target wasm32-wasip2 --release
-wasmtime serve --addr 127.0.0.1:8080 -S cli=y target/wasm32-wasip2/release/deadline_dashboard.wasm
+python3 -m http.server 8080
 ```
-
-Open http://127.0.0.1:8080 in your browser.
 
 ## Data and sync
 
