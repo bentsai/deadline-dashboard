@@ -6,6 +6,8 @@ With DD, you can set deadlines to show how many days before the due date, and cr
 
 This is not meant for task breakdowns or managing projects. No notifications. No details. Just big words.
 
+![Screenshot](screenshot.png)
+
 ## Running
 
 Requires [wasmtime](https://wasmtime.dev/) and a Rust toolchain with the `wasm32-wasip2` target.
@@ -15,7 +17,15 @@ cargo build --target wasm32-wasip2 --release
 wasmtime serve --addr 127.0.0.1:8080 -S cli=y target/wasm32-wasip2/release/deadline_dashboard.wasm
 ```
 
-Open http://127.0.0.1:8080 in your browser. All data is stored in localStorage.
+Open http://127.0.0.1:8080 in your browser.
+
+## Data and sync
+
+All data lives in your browser's localStorage. There is no cloud sync, no accounts, no server-side storage. Your deadlines, Now cards, and scratch notes never leave your machine.
+
+## Export / Import
+
+Click "export" in the bottom-right corner. This encodes all your data (deadlines, Now cards, and today notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
 
 ## Features
 
