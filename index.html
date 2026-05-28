@@ -710,7 +710,9 @@
         if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave();
         if (e.key === "Escape") render();
       });
-      input.addEventListener("blur", () => setTimeout(trySave, 100));
+      input.addEventListener("blur", () => setTimeout(() => {
+        if (!card.contains(document.activeElement)) trySave();
+      }, 100));
       document.getElementById("edit-done").addEventListener("mousedown", (e) => {
         e.preventDefault(); e.stopPropagation();
         saved = true;
@@ -844,7 +846,9 @@
         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") trySave();
         if (e.key === "Escape") renderNow();
       });
-      input.addEventListener("blur", () => setTimeout(trySave, 100));
+      input.addEventListener("blur", () => setTimeout(() => {
+        if (!card.contains(document.activeElement)) trySave();
+      }, 100));
       document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
