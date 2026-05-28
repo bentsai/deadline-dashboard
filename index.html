@@ -16,16 +16,19 @@
       --card-bg: #fff;
       --card-fg: #000;
       --muted: #767676;
-      --muted-light: #777;
       --border-dim: #444;
       --border-hover: #777;
       --accent: #ffcc00;
       --danger: #ff0000;
       --urgent-bg: #cc2200;
       --soon-bg: #ffcc00;
+      --soon-fg: #4a4a00;
       --past-bg: #2e2e2e;
       --past-fg: #b0b0b0;
       --done-bg: #1a7a3a;
+      --on-dark: rgba(255,255,255,.85);
+      --on-dark-muted: rgba(255,255,255,.75);
+      --on-dark-dim: rgba(255,255,255,.6);
       --now-bg: #1a1a1a;
       --now-input-bg: #111;
       --card-min-h: 220px;
@@ -80,33 +83,33 @@
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
       & .card-date { color: var(--fg); }
-      & .label { color: rgba(255,255,255,.85); }
-      & .inline-actions button { color: rgba(255,255,255,.75); }
+      & .label { color: var(--on-dark); }
+      & .inline-actions button { color: var(--on-dark-muted); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
-      & .inline-input { border-color: rgba(255,255,255,.6); color: var(--fg); }
+      & .inline-input { border-color: var(--on-dark-dim); color: var(--fg); }
       & .inline-input:focus { border-color: var(--fg); }
     }
     .card.soon {
       background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
-      & .card-date { color: #4a4a00; }
-      & .label { color: #4a4a00; }
+      & .card-date { color: var(--soon-fg); }
+      & .label { color: var(--soon-fg); }
     }
     .card.past {
       background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted);
       & .card-date { color: var(--past-fg); }
-      & .card-days { color: var(--muted-light); }
-      & .label { color: var(--muted-light); }
+      & .card-days { color: var(--past-fg); }
+      & .label { color: var(--past-fg); }
     }
     .card.done {
       background: var(--done-bg); color: var(--fg); border-color: var(--done-bg); outline-color: var(--done-bg);
       & .card-date { color: var(--fg); }
-      & .label { color: rgba(255,255,255,.85); }
-      & .inline-hint { color: rgba(255,255,255,.7); }
-      & .inline-actions button { color: rgba(255,255,255,.75); }
+      & .label { color: var(--on-dark); }
+      & .inline-hint { color: var(--on-dark-muted); }
+      & .inline-actions button { color: var(--on-dark-muted); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
-      & .inline-input { border-color: rgba(255,255,255,.6); color: var(--fg); }
+      & .inline-input { border-color: var(--on-dark-dim); color: var(--fg); }
       & .inline-input:focus { border-color: var(--fg); }
     }
     .card-name {
@@ -216,7 +219,7 @@
     .inline-actions button:hover { color: var(--fg); }
     .inline-actions button.done-btn { color: var(--done-bg); }
     .inline-actions button.done-btn:hover { color: #2da653; }
-    .inline-actions button.danger { color: var(--muted-light); }
+    .inline-actions button.danger { color: var(--muted); }
     .inline-actions button.danger:hover { color: var(--danger); text-decoration: underline; }
     .card.ok {
       & .inline-actions button { color: var(--past-fg); }
@@ -227,10 +230,10 @@
       & .inline-error { color: var(--danger); }
     }
     .card.soon {
-      & .inline-actions button { color: var(--muted-light); }
+      & .inline-actions button { color: var(--soon-fg); }
       & .inline-actions button:hover { color: var(--card-fg); }
       & .inline-actions button.danger:hover { color: var(--danger); }
-      & .inline-input { border-color: var(--past-fg); color: var(--card-fg); }
+      & .inline-input { border-color: var(--soon-fg); color: var(--card-fg); }
       & .inline-input:focus { border-color: var(--card-fg); }
     }
     .card:hover, .card:focus { outline-color: var(--accent); }
@@ -330,7 +333,7 @@
     }
     .now-add:hover { border-color: var(--muted); }
     .now-add .plus { font-size: 1rem; font-weight: 400; color: var(--muted); }
-    .now-add:hover .plus { color: var(--muted-light); }
+    .now-add:hover .plus { color: var(--border-hover); }
     .now-add.active {
       border-color: var(--fg);
       flex-direction: column;
