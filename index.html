@@ -84,6 +84,7 @@
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
       & .card-date { color: var(--fg); }
       & .label { color: var(--on-dark); }
+      & .inline-hint { color: var(--on-dark-muted); }
       & .inline-actions button { color: var(--on-dark-muted); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
@@ -145,6 +146,8 @@
       letter-spacing: .1em;
       color: var(--muted);
     }
+    @keyframes flash { 0% { transform: rotate(0deg); } 20% { transform: rotate(1.5deg); } 40% { transform: rotate(-1.5deg); } 60% { transform: rotate(.8deg); } 80% { transform: rotate(-.4deg); } 100% { transform: rotate(0deg); } }
+    .card.flash { animation: flash .5s ease-in-out; contain: layout paint; }
     @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
     .blink-colon {
       margin-left: -.24em;
@@ -588,7 +591,7 @@
         const {cls, stamp} = urgency(t.days, d.done, t.ms);
 
         const card = document.createElement("div");
-        card.className = "card " + cls;
+        card.className = "card " + cls + (flashTarget === d.name ? " flash" : "");
         card.tabIndex = 0;
         card.setAttribute("role", "button");
         const dateObj = new Date(d.date);
@@ -617,6 +620,7 @@
         });
         grid.appendChild(card);
       });
+      flashTarget = null;
 
       const addCard = document.createElement("div");
       addCard.className = "add-card";
@@ -651,6 +655,7 @@
     }
 
     let addingWhen = false;
+    let flashTarget = null;
     function doAdd() {
       if (addingWhen) return;
       const input = document.getElementById("add-input");
@@ -664,6 +669,7 @@
       const whens = load();
       whens.push({name: result.name, date: result.date});
       save(whens);
+      flashTarget = result.name;
       render();
       addingWhen = false;
     }
@@ -781,6 +787,7 @@
       addCard.setAttribute("aria-label", "Add new item");
       addCard.innerHTML = '<span class="plus">+ new</span>';
       function activateWhatAdd() {
+        if (addCard.classList.contains("active")) return;
         addCard.removeAttribute("role");
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
@@ -797,6 +804,7 @@
       }
       addCard.addEventListener("click", activateWhatAdd);
       addCard.addEventListener("keydown", (e) => {
+        if (addCard.classList.contains("active")) return;
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateWhatAdd(); }
       });
       grid.appendChild(addCard);
