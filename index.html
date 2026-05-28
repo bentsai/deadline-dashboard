@@ -253,25 +253,31 @@
       border-bottom: 6px solid var(--fg);
       text-wrap: balance;
     }
-    .bottom-sections {
+    .deadline-area {
+      grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
+      grid-template-columns: subgrid;
       gap: 1.5rem;
-      margin-top: 3rem;
     }
-    .now-section {
-      grid-column: span 2;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
+    .grid-separator {
+      grid-column: 1 / -1;
+      height: 0;
+      margin-top: 1.5rem;
     }
-    .today-section {
-      grid-column: 3 / -1;
-      display: flex;
-      flex-direction: column;
+    .now-heading {
+      grid-column: 1 / -3;
+    }
+    .today-heading {
+      grid-column: -3 / -1;
+    }
+    .now-card-area {
+      grid-column: 1 / -3;
+      display: grid;
+      grid-template-columns: subgrid;
+      gap: 1.5rem;
     }
     #today-text {
-      flex: 1;
+      grid-column: -3 / -1;
       min-height: 350px;
       font-family: var(--font-scratch);
       font-size: 2rem;
@@ -284,13 +290,14 @@
     }
     #today-text::placeholder { color: var(--muted); }
     #today-text:focus { outline: none; border-color: var(--accent); }
-    @media (max-width: 900px) {
-      .today-section, .now-section { grid-column: 1 / -1; }
-    }
-    .now-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
-      gap: 1.5rem;
+    @media (max-width: 1250px) {
+      .now-heading, .today-heading, .now-card-area, #today-text {
+        grid-column: 1 / -1;
+      }
+      .now-heading { order: 1; }
+      .now-card-area { order: 2; }
+      .today-heading { order: 3; }
+      #today-text { order: 4; grid-row: auto; }
     }
     .now-card {
       background: var(--now-bg);
@@ -362,16 +369,13 @@
 <body>
   <main>
   <h1>Deadlines</h1>
-  <div class="grid" id="grid"></div>
-  <div class="bottom-sections">
-    <section class="now-section">
-      <h2>Now</h2>
-      <div class="now-grid" id="now-grid"></div>
-    </section>
-    <section class="today-section">
-      <h2>Today</h2>
-      <textarea id="today-text" aria-label="Today scratch notes" placeholder="Scratch space…"></textarea>
-    </section>
+  <div class="grid">
+    <div class="deadline-area" id="grid"></div>
+    <div class="grid-separator" role="none"></div>
+    <h2 class="now-heading">Now</h2>
+    <h2 class="today-heading">Today</h2>
+    <div class="now-card-area" id="now-grid"></div>
+    <textarea id="today-text" aria-label="Today scratch notes" placeholder="Scratch space…"></textarea>
   </div>
   </main>
   <footer class="export-bar"><button id="export-btn">export</button><span id="export-status" aria-live="polite"></span></footer>
