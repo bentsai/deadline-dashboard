@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>DEADLINES</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000">
+  <meta name="description" content="Countdown dashboard for deadlines and top-of-mind projects">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
@@ -13,7 +15,7 @@
       --fg: #fff;
       --card-bg: #fff;
       --card-fg: #000;
-      --muted: #666;
+      --muted: #767676;
       --muted-light: #777;
       --border-dim: #444;
       --border-hover: #777;
@@ -22,7 +24,7 @@
       --urgent-bg: #cc2200;
       --soon-bg: #ffcc00;
       --past-bg: #2e2e2e;
-      --past-fg: #999;
+      --past-fg: #b0b0b0;
       --done-bg: #1a7a3a;
       --now-bg: #1a1a1a;
       --now-input-bg: #111;
@@ -69,6 +71,7 @@
       overflow: hidden;
       cursor: pointer;
       transition: outline-color .1s;
+      contain: layout style paint;
     }
     .card .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-size: 14rem; line-height: 1; pointer-events: none; opacity: .15; z-index: 0; }
     .card.urgent .stamp { opacity: .25; }
@@ -76,8 +79,8 @@
     .card > *:not(.stamp) { position: relative; z-index: 1; }
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
-      & .card-date { color: rgba(255,255,255,.75); }
-      & .label { color: rgba(255,255,255,.75); }
+      & .card-date { color: var(--fg); }
+      & .label { color: rgba(255,255,255,.85); }
       & .inline-actions button { color: rgba(255,255,255,.75); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
@@ -86,17 +89,20 @@
     }
     .card.soon {
       background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
+      & .card-date { color: #4a4a00; }
+      & .label { color: #4a4a00; }
     }
     .card.past {
       background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted);
+      & .card-date { color: var(--past-fg); }
       & .card-days { color: var(--muted-light); }
       & .label { color: var(--muted-light); }
     }
     .card.done {
       background: var(--done-bg); color: var(--fg); border-color: var(--done-bg); outline-color: var(--done-bg);
-      & .card-date { color: rgba(255,255,255,.75); }
-      & .label { color: rgba(255,255,255,.75); }
-      & .inline-hint { color: rgba(255,255,255,.6); }
+      & .card-date { color: var(--fg); }
+      & .label { color: rgba(255,255,255,.85); }
+      & .inline-hint { color: rgba(255,255,255,.7); }
       & .inline-actions button { color: rgba(255,255,255,.75); }
       & .inline-actions button:hover { color: var(--fg); }
       & .inline-actions button.danger:hover { color: var(--accent); }
@@ -158,7 +164,7 @@
     .add-card .plus {
       font-size: 1.5rem;
       font-weight: 400;
-      color: var(--border-dim);
+      color: var(--muted);
       font-family: var(--font);
       transition: color .15s;
     }
@@ -295,6 +301,7 @@
       justify-content: center;
       position: relative;
       transition: border-color .15s, transform .15s;
+      contain: layout style paint;
     }
     .now-card:hover { border-color: var(--accent); }
     .now-card.dragging { opacity: .3; transform: scale(.95); }
@@ -346,22 +353,25 @@
       cursor: pointer;
     }
     .export-bar button:hover { color: var(--fg); }
+    #export-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   </style>
 </head>
 <body>
+  <main>
   <h1>Deadlines</h1>
   <div class="grid" id="grid"></div>
   <div class="bottom-sections">
     <section class="today-section">
       <h2>Today</h2>
-      <textarea id="today-text" placeholder="Scratch space…"></textarea>
+      <textarea id="today-text" aria-label="Today scratch notes" placeholder="Scratch space…"></textarea>
     </section>
     <section class="now-section">
       <h2>Now</h2>
       <div class="now-grid" id="now-grid"></div>
     </section>
   </div>
-  <footer class="export-bar"><button id="export-btn">export</button></footer>
+  </main>
+  <footer class="export-bar"><button id="export-btn">export</button><span id="export-status" aria-live="polite"></span></footer>
   <script>
     let nowDragIdx = null;
     function formatISOLocal(dt) {
@@ -556,10 +566,10 @@
     }
 
     function urgency(days, done) {
-      if (done) return {cls: "done", stamp: '<span class="stamp">&#x2605;&#xFE0E;</span>'};
-      if (days < 0) return {cls: "past", stamp: '<span class="stamp">&#x2716;</span>'};
-      if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp">&#x26A0;</span>'};
-      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp">&#x231B;&#xFE0E;</span>'};
+      if (done) return {cls: "done", stamp: '<span class="stamp" aria-hidden="true">&#x2605;&#xFE0E;</span>'};
+      if (days < 0) return {cls: "past", stamp: '<span class="stamp" aria-hidden="true">&#x2716;</span>'};
+      if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp" aria-hidden="true">&#x26A0;</span>'};
+      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp" aria-hidden="true">&#x231B;&#xFE0E;</span>'};
       return {cls: "ok", stamp: ""};
     }
 
@@ -594,7 +604,6 @@
           label = t.unit;
           number = t.value;
         }
-        card.setAttribute("aria-label", d.name + ", " + (d.done ? label : t.value + " " + t.unit));
         let colonBefore = "", colonAfter = "";
         if (!d.done && t.unit === "hours left") colonAfter = '<span class="blink-colon">:</span>';
         else if (!d.done && t.unit === "minutes left") colonBefore = '<span class="blink-colon minutes">:</span>';
@@ -624,7 +633,7 @@
         addCard.classList.add("active");
         addCard.innerHTML = '<textarea class="inline-input" id="add-input" rows="2" placeholder="Project proposal due June 15"></textarea>'
           + '<span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span>'
-          + '<span class="inline-error" id="add-error"></span>';
+          + '<span class="inline-error" id="add-error" aria-live="assertive"></span>';
         const input = document.getElementById("add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
@@ -676,7 +685,7 @@
       const d = deadlines[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
-        + '<span class="inline-error" id="edit-error"></span>'
+        + '<span class="inline-error" id="edit-error" aria-live="assertive"></span>'
         + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
@@ -878,9 +887,14 @@
     document.getElementById("export-btn").addEventListener("click", function() {
       const data = { deadlines: load(), now: loadNow(), today: loadToday() };
       const url = location.origin + location.pathname + "#data=" + btoa(JSON.stringify(data));
+      const status = document.getElementById("export-status");
       navigator.clipboard.writeText(url).then(() => {
         this.textContent = "copied!";
-        setTimeout(() => { this.textContent = "export"; }, 2000);
+        status.textContent = "Export URL copied to clipboard";
+        setTimeout(() => { this.textContent = "export"; status.textContent = ""; }, 2000);
+      }).catch(() => {
+        status.textContent = "Copy failed";
+        setTimeout(() => { status.textContent = ""; }, 2000);
       });
     });
   </script>
