@@ -437,13 +437,18 @@
     function loadToday() { return localStorage.getItem(TODAY_KEY) || ""; }
     function saveToday(text) { localStorage.setItem(TODAY_KEY, text); }
 
+    const MS_MINUTE = 60000;
+    const MS_HOUR = 3600000;
+    const MS_DAY = 86400000;
+    const MS_12H = 12 * MS_HOUR;
+
     function timeUntil(dateStr) {
       const ms = new Date(dateStr) - new Date();
-      const days = Math.ceil(ms / 86400000);
-      if (ms <= 0) return {value: Math.abs(days), unit: "days ago", days};
-      if (ms >= 86400000) return {value: days, unit: "days left", days};
-      if (ms >= 3600000) return {value: Math.ceil(ms / 3600000), unit: "hours left", days: 0};
-      return {value: Math.max(1, Math.ceil(ms / 60000)), unit: "minutes left", days: 0};
+      const days = Math.ceil(ms / MS_DAY);
+      if (ms <= 0) return {value: Math.abs(days), unit: "days ago", days, ms};
+      if (ms >= MS_DAY) return {value: days, unit: "days left", days, ms};
+      if (ms >= MS_HOUR) return {value: Math.ceil(ms / MS_HOUR), unit: "hours left", days: 0, ms};
+      return {value: Math.max(1, Math.ceil(ms / MS_MINUTE)), unit: "minutes left", days: 0, ms};
     }
 
     const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
@@ -568,11 +573,11 @@
       return d.name + " " + mo + " " + day + " " + year + time;
     }
 
-    function urgency(days, done) {
+    function urgency(days, done, ms) {
       if (done) return {cls: "done", stamp: '<span class="stamp" aria-hidden="true">&#x2605;&#xFE0E;</span>'};
       if (days < 0) return {cls: "past", stamp: '<span class="stamp" aria-hidden="true">&#x2716;</span>'};
-      if (days <= 2) return {cls: "urgent", stamp: '<span class="stamp" aria-hidden="true">&#x26A0;</span>'};
-      if (days <= 7) return {cls: "soon", stamp: '<span class="stamp" aria-hidden="true">&#x231B;&#xFE0E;</span>'};
+      if (ms <= MS_12H) return {cls: "urgent", stamp: '<span class="stamp" aria-hidden="true">&#x26A0;</span>'};
+      if (days <= 5) return {cls: "soon", stamp: '<span class="stamp" aria-hidden="true">&#x231B;&#xFE0E;</span>'};
       return {cls: "ok", stamp: ""};
     }
 
@@ -590,7 +595,7 @@
       grid.innerHTML = "";
       deadlines.forEach((d, i) => {
         const t = timeUntil(d.date);
-        const {cls, stamp} = urgency(t.days, d.done);
+        const {cls, stamp} = urgency(t.days, d.done, t.ms);
 
         const card = document.createElement("div");
         card.className = "card " + cls;
