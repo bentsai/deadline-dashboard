@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>DEADLINES</title>
+  <title>WHAT AND WHEN</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#000">
-  <meta name="description" content="Countdown dashboard for deadlines and top-of-mind projects">
+  <meta name="description" content="What and When — countdowns and top-of-mind projects">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
@@ -29,8 +29,8 @@
       --on-dark: rgba(255,255,255,.85);
       --on-dark-muted: rgba(255,255,255,.75);
       --on-dark-dim: rgba(255,255,255,.6);
-      --now-bg: #1a1a1a;
-      --now-input-bg: #111;
+      --what-bg: #1a1a1a;
+      --what-input-bg: #111;
       --card-min-h: 220px;
       --grid-min: 380px;
       --font: "Rubik", sans-serif;
@@ -240,10 +240,10 @@
     .card:focus { outline-style: solid; }
     .card.soon:hover, .card.soon:focus { outline-color: var(--fg); }
     .card.editing { outline-color: var(--fg); cursor: default; justify-content: center; }
-    .now-card.editing { justify-content: center; }
-    .now-card:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
+    .what-card.editing { justify-content: center; }
+    .what-card:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
     .add-card:focus { border-color: var(--border-hover); outline: 2px solid var(--accent); outline-offset: 2px; }
-    .now-add:focus { border-color: var(--muted); outline: 2px solid var(--accent); outline-offset: 2px; }
+    .what-add:focus { border-color: var(--muted); outline: 2px solid var(--accent); outline-offset: 2px; }
     h2 {
       font-size: 3rem;
       text-transform: uppercase;
@@ -259,41 +259,41 @@
       gap: 1.5rem;
       margin-top: 3rem;
     }
-    .now-section {
+    .what-section {
       grid-column: span 2;
       display: flex;
       flex-direction: column;
       min-width: 0;
     }
-    .today-section {
+    .words-section {
       grid-column: 3 / -1;
       display: flex;
       flex-direction: column;
     }
-    #today-text {
+    #words-text {
       flex: 1;
       min-height: 350px;
       font-family: var(--font-scratch);
       font-size: 2rem;
-      background: var(--now-bg);
+      background: var(--what-bg);
       color: var(--fg);
       border: 2px solid var(--border-dim);
       padding: 1.5rem;
       resize: none;
       line-height: 1.6;
     }
-    #today-text::placeholder { color: var(--muted); }
-    #today-text:focus { outline: none; border-color: var(--accent); }
+    #words-text::placeholder { color: var(--muted); }
+    #words-text:focus { outline: none; border-color: var(--accent); }
     @media (max-width: 1250px) {
-      .today-section, .now-section { grid-column: 1 / -1; }
+      .words-section, .what-section { grid-column: 1 / -1; }
     }
-    .now-grid {
+    .what-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
       gap: 1.5rem;
     }
-    .now-card {
-      background: var(--now-bg);
+    .what-card {
+      background: var(--what-bg);
       color: var(--fg);
       padding: 2rem;
       border: 2px solid var(--border-dim);
@@ -306,21 +306,21 @@
       transition: border-color .15s, transform .15s;
       contain: layout style paint;
     }
-    .now-card:hover { border-color: var(--accent); }
-    .now-card.dragging { opacity: .3; transform: scale(.95); }
-    .now-card.editing { border-color: var(--fg); cursor: default; }
-    .now-card .now-text {
+    .what-card:hover { border-color: var(--accent); }
+    .what-card.dragging { opacity: .3; transform: scale(.95); }
+    .what-card.editing { border-color: var(--fg); cursor: default; }
+    .what-card .what-text {
       font-size: 3rem;
       font-weight: 400;
       line-height: 1.2;
       white-space: pre-line;
     }
-    .now-card .inline-input { border-color: var(--muted); background: var(--now-input-bg); color: var(--fg); }
-    .now-card .inline-input:focus { border-color: var(--accent); }
-    .now-card .inline-actions button { border-color: var(--muted); color: var(--past-fg); }
-    .now-card .inline-actions button:hover { border-color: var(--fg); color: var(--fg); }
-    .now-card .inline-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
-    .now-add {
+    .what-card .inline-input { border-color: var(--muted); background: var(--what-input-bg); color: var(--fg); }
+    .what-card .inline-input:focus { border-color: var(--accent); }
+    .what-card .inline-actions button { border-color: var(--muted); color: var(--past-fg); }
+    .what-card .inline-actions button:hover { border-color: var(--fg); color: var(--fg); }
+    .what-card .inline-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
+    .what-add {
       background: transparent;
       border: 2px solid #222;
       padding: 2rem;
@@ -331,10 +331,10 @@
       cursor: pointer;
       transition: border-color .15s;
     }
-    .now-add:hover { border-color: var(--muted); }
-    .now-add .plus { font-size: 1rem; font-weight: 400; color: var(--muted); }
-    .now-add:hover .plus { color: var(--border-hover); }
-    .now-add.active {
+    .what-add:hover { border-color: var(--muted); }
+    .what-add .plus { font-size: 1rem; font-weight: 400; color: var(--muted); }
+    .what-add:hover .plus { color: var(--border-hover); }
+    .what-add.active {
       border-color: var(--fg);
       flex-direction: column;
       align-items: stretch;
@@ -361,22 +361,22 @@
 </head>
 <body>
   <main>
-  <h1>Deadlines</h1>
+  <h1>When</h1>
   <div class="grid" id="grid"></div>
   <div class="bottom-sections">
-    <section class="now-section">
-      <h2>Now</h2>
-      <div class="now-grid" id="now-grid"></div>
+    <section class="what-section">
+      <h2>What</h2>
+      <div class="what-grid" id="what-grid"></div>
     </section>
-    <section class="today-section">
-      <h2>Today</h2>
-      <textarea id="today-text" aria-label="Today scratch notes" placeholder="Scratch space…"></textarea>
+    <section class="words-section">
+      <h2>Words</h2>
+      <textarea id="words-text" aria-label="Words scratch notes" placeholder="Scratch space…"></textarea>
     </section>
   </div>
   </main>
   <footer class="export-bar"><button id="export-btn">export</button><span id="export-status" aria-live="polite"></span></footer>
   <script>
-    let nowDragIdx = null;
+    let whatDragIdx = null;
     function formatISOLocal(dt) {
       const p = n => String(n).padStart(2, "0");
       return dt.getFullYear() + "-" + p(dt.getMonth() + 1) + "-" + p(dt.getDate())
@@ -401,14 +401,14 @@
       ];
     }
 
-    const NOW_SEED = [
+    const WHAT_SEED = [
       {text: "Prep talking points for 1:1"},
       {text: "Reply to Slack thread on launch plan"},
       {text: "Read RFC on new auth flow"}
     ];
 
-    const KEY = "deadline-dashboard-v1";
-    const NOW_KEY = "now-cards-v1";
+    const KEY = "whatandwhen-when-v1";
+    const WHAT_KEY = "whatandwhen-what-v1";
 
     function load() {
       const raw = localStorage.getItem(KEY);
@@ -418,24 +418,24 @@
       return seed;
     }
 
-    function save(deadlines) {
-      localStorage.setItem(KEY, JSON.stringify(deadlines));
+    function save(whens) {
+      localStorage.setItem(KEY, JSON.stringify(whens));
     }
 
-    function loadNow() {
-      const raw = localStorage.getItem(NOW_KEY);
+    function loadWhat() {
+      const raw = localStorage.getItem(WHAT_KEY);
       if (raw) return JSON.parse(raw);
-      saveNow(NOW_SEED);
-      return NOW_SEED;
+      saveWhat(WHAT_SEED);
+      return WHAT_SEED;
     }
 
-    function saveNow(cards) {
-      localStorage.setItem(NOW_KEY, JSON.stringify(cards));
+    function saveWhat(cards) {
+      localStorage.setItem(WHAT_KEY, JSON.stringify(cards));
     }
 
-    const TODAY_KEY = "today-text-v1";
-    function loadToday() { return localStorage.getItem(TODAY_KEY) || ""; }
-    function saveToday(text) { localStorage.setItem(TODAY_KEY, text); }
+    const WORDS_KEY = "whatandwhen-words-v1";
+    function loadWords() { return localStorage.getItem(WORDS_KEY) || ""; }
+    function saveWords(text) { localStorage.setItem(WORDS_KEY, text); }
 
     const MS_MINUTE = 60000;
     const MS_HOUR = 3600000;
@@ -589,11 +589,11 @@
     }
 
     function render() {
-      const deadlines = load();
-      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const whens = load();
+      whens.sort((a, b) => new Date(a.date) - new Date(b.date));
       const grid = document.getElementById("grid");
       grid.innerHTML = "";
-      deadlines.forEach((d, i) => {
+      whens.forEach((d, i) => {
         const t = timeUntil(d.date);
         const {cls, stamp} = urgency(t.days, d.done, t.ms);
 
@@ -632,8 +632,8 @@
       addCard.className = "add-card";
       addCard.tabIndex = 0;
       addCard.setAttribute("role", "button");
-      addCard.setAttribute("aria-label", "Add new deadline");
-      addCard.innerHTML = '<span class="plus">+ new deadline</span>';
+      addCard.setAttribute("aria-label", "Add new");
+      addCard.innerHTML = '<span class="plus">+ new</span>';
       function activateAdd() {
         if (addCard.classList.contains("active")) return;
         addCard.removeAttribute("role");
@@ -660,9 +660,9 @@
       grid.appendChild(addCard);
     }
 
-    let addingDeadline = false;
+    let addingWhen = false;
     function doAdd() {
-      if (addingDeadline) return;
+      if (addingWhen) return;
       const input = document.getElementById("add-input");
       if (!input) return;
       const val = input.value.trim();
@@ -670,15 +670,15 @@
       if (!val) { render(); return; }
       const result = splitInput(val);
       if (!result) { if (err) err.textContent = "Include a date, e.g. \"Report due May 30\""; return; }
-      addingDeadline = true;
-      const deadlines = load();
-      deadlines.push({name: result.name, date: result.date});
-      save(deadlines);
+      addingWhen = true;
+      const whens = load();
+      whens.push({name: result.name, date: result.date});
+      save(whens);
       render();
-      addingDeadline = false;
+      addingWhen = false;
     }
 
-    function findDeadline(name, date) {
+    function findWhen(name, date) {
       const all = load();
       const ri = all.findIndex(x => x.name === name && x.date === date);
       return {all, ri};
@@ -688,9 +688,9 @@
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
       card.removeAttribute("role");
-      const deadlines = load();
-      deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
-      const d = deadlines[idx];
+      const whens = load();
+      whens.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const d = whens[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
         + '<span class="inline-error" id="edit-error" aria-live="assertive"></span>'
@@ -706,7 +706,7 @@
         if (!val) { render(); return; }
         const result = splitInput(val);
         if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
-        const {all, ri} = findDeadline(origName, origDate);
+        const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) { all[ri] = {name: result.name, date: result.date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
         render();
       }
@@ -721,7 +721,7 @@
       document.getElementById("edit-done").addEventListener("mousedown", (e) => {
         e.preventDefault(); e.stopPropagation();
         saved = true;
-        const {all, ri} = findDeadline(origName, origDate);
+        const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) {
           all[ri].done = !d.done;
           if (all[ri].done) all[ri].doneAt = new Date().toISOString();
@@ -733,107 +733,107 @@
       document.getElementById("edit-delete").addEventListener("mousedown", (e) => {
         e.preventDefault(); e.stopPropagation();
         saved = true;
-        const {all, ri} = findDeadline(origName, origDate);
+        const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) { all.splice(ri, 1); save(all); }
         render();
       });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
 
-    function renderNow() {
-      const cards = loadNow();
-      const grid = document.getElementById("now-grid");
+    function renderWhat() {
+      const cards = loadWhat();
+      const grid = document.getElementById("what-grid");
       grid.innerHTML = "";
       cards.forEach((c, i) => {
         const card = document.createElement("div");
-        card.className = "now-card";
+        card.className = "what-card";
         card.tabIndex = 0;
         card.setAttribute("role", "button");
         card.setAttribute("aria-label", c.text);
         card.draggable = true;
         card.dataset.idx = i;
-        card.innerHTML = '<span class="now-text">' + escHtml(c.text) + '</span>';
-        card.addEventListener("click", () => startNowEdit(card, i));
+        card.innerHTML = '<span class="what-text">' + escHtml(c.text) + '</span>';
+        card.addEventListener("click", () => startWhatEdit(card, i));
         card.addEventListener("keydown", (e) => {
           if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault(); startNowEdit(card, i);
+            e.preventDefault(); startWhatEdit(card, i);
           }
         });
         card.addEventListener("dragstart", (e) => {
           e.dataTransfer.effectAllowed = "move";
-          nowDragIdx = i;
+          whatDragIdx = i;
           card.classList.add("dragging");
         });
         card.addEventListener("dragend", () => {
           card.classList.remove("dragging");
-          if (nowDragIdx === null) return;
-          const current = loadNow();
-          const reordered = [...grid.querySelectorAll(".now-card")].map(el => current[parseInt(el.dataset.idx)]);
-          saveNow(reordered);
-          nowDragIdx = null;
-          renderNow();
+          if (whatDragIdx === null) return;
+          const current = loadWhat();
+          const reordered = [...grid.querySelectorAll(".what-card")].map(el => current[parseInt(el.dataset.idx)]);
+          saveWhat(reordered);
+          whatDragIdx = null;
+          renderWhat();
         });
         card.addEventListener("dragover", (e) => {
           e.preventDefault();
           e.dataTransfer.dropEffect = "move";
           const dragging = grid.querySelector(".dragging");
           if (!dragging || dragging === card) return;
-          const all = [...grid.querySelectorAll(".now-card")];
+          const all = [...grid.querySelectorAll(".what-card")];
           if (all.indexOf(dragging) < all.indexOf(card)) card.after(dragging);
           else card.before(dragging);
         });
         grid.appendChild(card);
       });
       const addCard = document.createElement("div");
-      addCard.className = "now-add";
+      addCard.className = "what-add";
       addCard.tabIndex = 0;
       addCard.setAttribute("role", "button");
       addCard.setAttribute("aria-label", "Add new item");
       addCard.innerHTML = '<span class="plus">+ new</span>';
-      function activateNowAdd() {
+      function activateWhatAdd() {
         addCard.removeAttribute("role");
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
-        addCard.innerHTML = '<textarea class="inline-input" id="now-add-input" rows="3" placeholder="What is top of mind?"></textarea>';
-        const input = document.getElementById("now-add-input");
+        addCard.innerHTML = '<textarea class="inline-input" id="what-add-input" rows="3" placeholder="What is top of mind?"></textarea>';
+        const input = document.getElementById("what-add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doNowAdd();
-          if (e.key === "Escape") renderNow();
+          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doWhatAdd();
+          if (e.key === "Escape") renderWhat();
         });
         input.addEventListener("blur", () => {
-          if (input.value.trim()) doNowAdd(); else renderNow();
+          if (input.value.trim()) doWhatAdd(); else renderWhat();
         });
       }
-      addCard.addEventListener("click", activateNowAdd);
+      addCard.addEventListener("click", activateWhatAdd);
       addCard.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateNowAdd(); }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateWhatAdd(); }
       });
       grid.appendChild(addCard);
     }
 
-    let addingNow = false;
-    function doNowAdd() {
-      if (addingNow) return;
-      const input = document.getElementById("now-add-input");
+    let addingWhat = false;
+    function doWhatAdd() {
+      if (addingWhat) return;
+      const input = document.getElementById("what-add-input");
       if (!input) return;
       const val = input.value.trim();
-      if (!val) { renderNow(); return; }
-      addingNow = true;
-      const cards = loadNow();
+      if (!val) { renderWhat(); return; }
+      addingWhat = true;
+      const cards = loadWhat();
       cards.push({text: val});
-      saveNow(cards);
-      renderNow();
-      addingNow = false;
+      saveWhat(cards);
+      renderWhat();
+      addingWhat = false;
     }
 
-    function startNowEdit(card, idx) {
+    function startWhatEdit(card, idx) {
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
-      const cards = loadNow();
-      card.innerHTML = '<textarea class="inline-input" id="now-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
-        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="now-edit-delete">delete</button></div>';
-      const input = document.getElementById("now-edit-input");
+      const cards = loadWhat();
+      card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
+        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="what-edit-delete">delete</button></div>';
+      const input = document.getElementById("what-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
       let saved = false;
@@ -841,26 +841,26 @@
         if (saved) return;
         saved = true;
         const val = input.value.trim();
-        if (!val) { renderNow(); return; }
+        if (!val) { renderWhat(); return; }
         cards[idx] = {text: val};
-        saveNow(cards);
-        renderNow();
+        saveWhat(cards);
+        renderWhat();
       }
       input.addEventListener("keydown", (e) => {
         e.stopPropagation();
         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") trySave();
-        if (e.key === "Escape") renderNow();
+        if (e.key === "Escape") renderWhat();
       });
       input.addEventListener("blur", () => setTimeout(() => {
         if (!card.contains(document.activeElement)) trySave();
       }, 100));
-      document.getElementById("now-edit-delete").addEventListener("mousedown", (e) => {
+      document.getElementById("what-edit-delete").addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
         saved = true;
         cards.splice(idx, 1);
-        saveNow(cards);
-        renderNow();
+        saveWhat(cards);
+        renderWhat();
       });
       card.addEventListener("click", (e) => e.stopPropagation());
     }
@@ -875,29 +875,29 @@
       try {
         const json = atob(location.hash.slice(6));
         const data = JSON.parse(json);
-        if (data.deadlines) save(data.deadlines);
-        if (data.now) saveNow(data.now);
-        if (data.today) saveToday(data.today);
+        if (data.when) save(data.when);
+        if (data.what) saveWhat(data.what);
+        if (data.words) saveWords(data.words);
       } catch(e) { console.warn("Failed to import data from URL hash", e); }
       history.replaceState(null, "", location.pathname);
     }
 
     render();
-    renderNow();
+    renderWhat();
     setInterval(() => {
-      if (!document.querySelector(".editing")) { render(); renderNow(); }
+      if (!document.querySelector(".editing")) { render(); renderWhat(); }
     }, 60000);
 
-    const todayEl = document.getElementById("today-text");
-    todayEl.value = loadToday();
-    let todayTimer = null;
-    todayEl.addEventListener("input", () => {
-      clearTimeout(todayTimer);
-      todayTimer = setTimeout(() => saveToday(todayEl.value), 300);
+    const wordsEl = document.getElementById("words-text");
+    wordsEl.value = loadWords();
+    let wordsTimer = null;
+    wordsEl.addEventListener("input", () => {
+      clearTimeout(wordsTimer);
+      wordsTimer = setTimeout(() => saveWords(wordsEl.value), 300);
     });
 
     document.getElementById("export-btn").addEventListener("click", function() {
-      const data = { deadlines: load(), now: loadNow(), today: loadToday() };
+      const data = { when: load(), what: loadWhat(), words: loadWords() };
       const url = location.origin + location.pathname + "#data=" + btoa(JSON.stringify(data));
       const status = document.getElementById("export-status");
       navigator.clipboard.writeText(url).then(() => {

@@ -1,12 +1,18 @@
-# Deadline Dashboard
+# What and When
 
 A place to organize top-of-mind projects and upcoming due dates.
 
-With DD, you can set deadlines to show how many days before the due date, and create cards that describe the big things. Finally, a scratch area to take notes.
+With What and When, you can set countdowns to show how many days before something is due, and create cards that describe the big things. Finally, a scratch area to take notes.
 
 This is not meant for task breakdowns or managing projects. No notifications. No details. Just big words.
 
 ![Screenshot](screenshot.png)
+
+## Terminology
+
+- **When** — countdown cards with due dates
+- **What** — cards for what's top of mind right now
+- **Words** — scratch space for notes
 
 ## Running
 
@@ -20,17 +26,17 @@ python3 -m http.server 8080
 
 ## Data and sync
 
-All data lives in your browser's localStorage. There is no cloud sync, no accounts, no server-side storage. Your deadlines, Now cards, and scratch notes never leave your machine.
+All data lives in your browser's localStorage. There is no cloud sync, no accounts, no server-side storage. Your data never leaves your machine.
 
 ## Export / Import
 
-Click "export" in the bottom-right corner. This encodes all your data (deadlines, Now cards, and today notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
+Click "export" in the bottom-right corner. This encodes all your data (When cards, What cards, and Words notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
 
 ## Features
 
 - Countdown cards with urgency-based color coding (red/yellow/white)
-- Mark deadlines as done (green card with completion timestamp)
-- "Now" cards for what's top of mind
+- Mark items as done (green card with completion timestamp)
+- "What" cards for what's top of mind
 - Scratch space for daily notes
 - Drag to reorder
 - Natural language date parsing ("next friday", "next week", "june 15 9am")
