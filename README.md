@@ -39,5 +39,26 @@ Click "export" in the bottom-right corner. This encodes all your data (When card
 - "What" cards for what's top of mind
 - Scratch space for daily notes
 - Drag to reorder
-- Natural language date parsing ("next friday", "next week", "june 15 9am")
+- Natural language date parsing (see below)
 - Export/import via URL for moving between browsers
+
+## Date parsing
+
+When adding a When card, type a name followed by a date. Examples:
+
+| Input | Parsed as |
+|-------|-----------|
+| `Report due today` | Today at 9:00 AM |
+| `Call mom tomorrow` | Tomorrow at 9:00 AM |
+| `Meeting tomorrow at 3pm` | Tomorrow at 3:00 PM |
+| `Ship feature friday` | Next Friday at 9:00 AM |
+| `Demo next wednesday` | Next Wednesday at 9:00 AM |
+| `Launch next week` | Next Monday at 10:00 AM |
+| `Proposal in 3 days` | 3 days from now at 9:00 AM |
+| `Deploy in 2 weeks` | 14 days from now at 9:00 AM |
+| `Reminder in 4 hours` | 4 hours from now (exact time) |
+| `Submit report june 15` | June 15 at 9:00 AM |
+| `Taxes 4/15` | April 15 at 9:00 AM |
+| `Party 12/31 at 8pm` | December 31 at 8:00 PM |
+
+Day names must be spelled out in full (e.g., "friday" not "fri").

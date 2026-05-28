@@ -118,6 +118,8 @@
       text-transform: uppercase;
       letter-spacing: .05em;
       text-wrap: balance;
+      line-height: 1.3;
+      min-height: 3.64rem;
     }
     .card-date {
       font-family: var(--font);
@@ -429,8 +431,7 @@
 
     const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
       january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
-    const DAYS = {sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,
-      sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
+    const DAYS = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
 
     function parseDate(str) {
       const s = str.trim().toLowerCase();
@@ -496,6 +497,18 @@
         }
       }
 
+      const inX = s.match(/^in\s+(\d+)\s+(day|days|hour|hours|week|weeks)$/);
+      if (inX) {
+        const n = parseInt(inX[1]);
+        const unit = inX[2];
+        const d = new Date(now);
+        if (unit.startsWith("hour")) d.setTime(d.getTime() + n * MS_HOUR);
+        else if (unit.startsWith("week")) d.setDate(d.getDate() + n * 7);
+        else d.setDate(d.getDate() + n);
+        if (!hasTime && !unit.startsWith("hour")) { d.setHours(9, 0, 0, 0); }
+        return formatISOLocal(d);
+      }
+
       const slashDate = s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
       if (slashDate) {
         const mo = parseInt(slashDate[1]) - 1;
@@ -516,7 +529,8 @@
     function splitInput(str) {
       const s = str.trim();
       const patterns = [
-        /^(.+?)\s+((?:next\s+)?(?:mon|tue|wed|thu|fri|sat|sun)\w*(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(in\s+\d+\s+(?:day|days|hour|hours|week|weeks))\s*$/i,
+        /^(.+?)\s+((?:next\s+)?(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(tomorrow(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(today(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
@@ -616,13 +630,13 @@
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
         addCard.innerHTML = '<textarea class="inline-input" id="add-input" rows="2" placeholder="Project proposal due June 15"></textarea>'
-          + '<span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span>'
+          + '<span class="inline-hint">Enter to save. Esc to cancel.</span>'
           + '<span class="inline-error" id="add-error" aria-live="assertive"></span>';
         const input = document.getElementById("add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
           e.stopPropagation();
-          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doAdd();
+          if (e.key === "Enter") { e.preventDefault(); doAdd(); }
           if (e.key === "Escape") render();
         });
         input.addEventListener("blur", () => {
@@ -670,7 +684,7 @@
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
         + '<span class="inline-error" id="edit-error" aria-live="assertive"></span>'
-        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -688,7 +702,7 @@
       }
       input.addEventListener("keydown", (e) => {
         e.stopPropagation();
-        if ((e.metaKey||e.ctrlKey) && e.key === "Enter") trySave();
+        if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") render();
       });
       input.addEventListener("blur", () => setTimeout(() => {
@@ -774,7 +788,7 @@
         const input = document.getElementById("what-add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") doWhatAdd();
+          if (e.key === "Enter") { e.preventDefault(); doWhatAdd(); }
           if (e.key === "Escape") renderWhat();
         });
         input.addEventListener("blur", () => {
@@ -808,7 +822,7 @@
       card.classList.add("editing");
       const cards = loadWhat();
       card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
-        + '<div class="inline-actions"><span class="inline-hint">Cmd+Enter to save. Esc to cancel.</span><button class="danger" id="what-edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="what-edit-delete">delete</button></div>';
       const input = document.getElementById("what-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -824,7 +838,7 @@
       }
       input.addEventListener("keydown", (e) => {
         e.stopPropagation();
-        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") trySave();
+        if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") renderWhat();
       });
       input.addEventListener("blur", () => setTimeout(() => {
