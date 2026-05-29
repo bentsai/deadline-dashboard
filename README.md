@@ -44,21 +44,21 @@ Click "export" in the bottom-right corner. This encodes all your data (When card
 
 ## Date parsing
 
-When adding a When card, type a name followed by a date. Examples:
+When adding a When card, type a name followed by a date. If no date is detected, it defaults to today at 5:00 PM. Examples:
 
 | Input | Parsed as |
 |-------|-----------|
 | `Report due today` | Today at 9:00 AM |
 | `Call mom tomorrow` | Tomorrow at 9:00 AM |
 | `Meeting tomorrow at 3pm` | Tomorrow at 3:00 PM |
-| `Ship feature friday` | Next Friday at 9:00 AM |
-| `Demo next wednesday` | Next Wednesday at 9:00 AM |
-| `Launch next week` | Next Monday at 10:00 AM |
+| `Ship feature friday` | Nearest Friday (including today) at 9:00 AM |
+| `Demo next wednesday` | Wednesday after the nearest one, at 9:00 AM |
 | `Proposal in 3 days` | 3 days from now at 9:00 AM |
 | `Deploy in 2 weeks` | 14 days from now at 9:00 AM |
 | `Reminder in 4 hours` | 4 hours from now (exact time) |
 | `Submit report june 15` | June 15 at 9:00 AM |
 | `Taxes 4/15` | April 15 at 9:00 AM |
 | `Party 12/31 at 8pm` | December 31 at 8:00 PM |
+| `Fix the bug` | Today at 5:00 PM (no date detected) |
 
 Day names must be spelled out in full (e.g., "friday" not "fri").
