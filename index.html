@@ -96,6 +96,11 @@
       background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
       & .card-date { color: var(--soon-fg); }
       & .label { color: var(--soon-fg); }
+      & .inline-actions button { color: var(--soon-fg); }
+      & .inline-actions button:hover { color: var(--card-fg); }
+      & .inline-actions button.danger:hover { color: var(--danger); }
+      & .inline-input { border-color: var(--soon-fg); color: var(--card-fg); }
+      & .inline-input:focus { border-color: var(--card-fg); }
     }
     .card.past {
       background: var(--past-bg); color: var(--past-fg); border-color: var(--past-bg); outline-color: var(--muted);
@@ -234,13 +239,6 @@
       & .inline-input { border-color: #ccc; color: var(--card-fg); }
       & .inline-input:focus { border-color: var(--card-fg); }
       & .inline-error { color: var(--danger); }
-    }
-    .card.soon {
-      & .inline-actions button { color: var(--soon-fg); }
-      & .inline-actions button:hover { color: var(--card-fg); }
-      & .inline-actions button.danger:hover { color: var(--danger); }
-      & .inline-input { border-color: var(--soon-fg); color: var(--card-fg); }
-      & .inline-input:focus { border-color: var(--card-fg); }
     }
     .card:hover, .card:focus { outline-color: var(--accent); }
     .card:focus { outline-style: solid; }
