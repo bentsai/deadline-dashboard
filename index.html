@@ -725,8 +725,11 @@
       input.addEventListener("keydown", (e) => {
         e.stopPropagation();
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
-        if (e.key === "Escape") render();
+        if (e.key === "Escape") { saved = true; render(); }
       });
+      // Leaving the field commits (click/tab away). Cancel paths set saved=true first
+      // so their re-render's blur doesn't re-save.
+      input.addEventListener("blur", () => trySave());
       document.getElementById("edit-done").addEventListener("mousedown", (e) => {
         e.preventDefault(); e.stopPropagation();
         saved = true;
@@ -860,8 +863,11 @@
       input.addEventListener("keydown", (e) => {
         e.stopPropagation();
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
-        if (e.key === "Escape") renderWhat();
+        if (e.key === "Escape") { saved = true; renderWhat(); }
       });
+      // Leaving the field commits (click/tab away). Cancel paths set saved=true first
+      // so their re-render's blur doesn't re-save.
+      input.addEventListener("blur", () => trySave());
       document.getElementById("what-edit-delete").addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
