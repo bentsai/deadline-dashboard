@@ -8,8 +8,8 @@
   <meta name="description" content="What &amp; When — a personal dashboard for your due dates and top-of-mind projects">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap"></noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,144,700&family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,144,700&family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap"></noscript>
   <style>
     :root {
       --bg: #000;
@@ -337,10 +337,30 @@
     }
     .export-bar button:hover { color: var(--fg); }
     #export-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .topbar {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .wordmark {
+      font-family: "Fraunces", serif;
+      font-weight: 700;
+      font-style: italic;
+      font-variation-settings: "opsz" 144;
+      font-size: 2rem;
+      letter-spacing: -.01em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .wordmark:hover { color: var(--fg); }
+    .wordmark:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   </style>
 </head>
 <body>
   <main>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="What and When — home">What &amp; When</a>
+  </header>
   <h1>When</h1>
   <div class="grid" id="grid"></div>
   <div class="bottom-sections">
