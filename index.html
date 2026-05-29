@@ -461,24 +461,30 @@
       january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
     const DAYS = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
 
+    function extractTime(str) {
+      const m = str.match(/\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+      if (m) {
+        let h = parseInt(m[1]);
+        const min = m[2] ? parseInt(m[2]) : 0;
+        if (m[3] === "pm" && h < 12) h += 12;
+        if (m[3] === "am" && h === 12) h = 0;
+        return { rest: str.slice(0, m.index), hour: h, min };
+      }
+      const m2 = str.match(/\s+at\s+(\d{1,2}):(\d{2})$/);
+      if (m2) return { rest: str.slice(0, m2.index), hour: parseInt(m2[1]), min: parseInt(m2[2]) };
+      return null;
+    }
+
     function parseDate(str) {
       const s = str.trim().toLowerCase();
       const now = new Date();
-      let hour = 9, min = 0;
+      const time = extractTime(s);
+      const base = time ? time.rest : s;
+      const hour = time ? time.hour : 9;
+      const min = time ? time.min : 0;
 
-      const timeMatch = s.match(/(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
-      if (timeMatch) {
-        hour = parseInt(timeMatch[1]);
-        min = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-        if (timeMatch[3] === "pm" && hour < 12) hour += 12;
-        if (timeMatch[3] === "am" && hour === 12) hour = 0;
-      }
-      const hasTime = !!timeMatch && (timeMatch[3] || timeMatch[2] || parseInt(timeMatch[1]) !== parseInt(s.match(/\d+/)?.[0]));
-
-      if (s === "today") {
-        return makeDate(now.getFullYear(), now.getMonth(), now.getDate(), hour, min);
-      }
-      if (s === "tomorrow") {
+      if (base === "today") return makeDate(now.getFullYear(), now.getMonth(), now.getDate(), hour, min);
+      if (base === "tomorrow") {
         const d = new Date(now); d.setDate(d.getDate() + 1);
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
@@ -493,57 +499,39 @@
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
-      if (s === "next week" || s.startsWith("next week ")) {
-        const d = new Date(now);
-        let diff = 1 - d.getDay();
-        if (diff <= 0) diff += 7;
-        d.setDate(d.getDate() + diff);
-        if (!hasTime) { hour = 10; min = 0; }
-        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
-      }
-
-      const nextDay = s.match(/^next\s+(\w+)/);
+      const nextDay = base.match(/^next\s+(\w+)$/);
       if (nextDay) { const r = nextWeekday(nextDay[1]); if (r) return r; }
 
-      const bareDay = s.match(/^(\w+?)(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?$/);
+      const bareDay = base.match(/^(\w+)$/);
       if (bareDay) { const r = nextWeekday(bareDay[1]); if (r) return r; }
 
       for (const [name, idx] of Object.entries(MONTHS)) {
-        const patterns = [
-          new RegExp(name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?"),
-          new RegExp("(\\d{1,2})\\s+" + name + "(?:[,\\s]+(\\d{4}))?")
-        ];
-        for (const re of patterns) {
-          const m = s.match(re);
-          if (m) {
-            const day = parseInt(m[1]);
-            let year = m[2] ? parseInt(m[2]) : now.getFullYear();
-            if (new Date(year, idx, day) < now && !m[2]) year++;
-            if (!hasTime) { hour = 9; min = 0; }
-            return makeDate(year, idx, day, hour, min);
-          }
+        const m = base.match(new RegExp("^" + name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?$"));
+        if (m) {
+          const day = parseInt(m[1]);
+          let year = m[2] ? parseInt(m[2]) : now.getFullYear();
+          if (new Date(year, idx, day) < now && !m[2]) year++;
+          return makeDate(year, idx, day, hour, min);
         }
       }
 
-      const inX = s.match(/^in\s+(\d+)\s+(day|days|hour|hours|week|weeks)$/);
+      const inX = base.match(/^in\s+(\d+)\s+(day|days|hour|hours|week|weeks)$/);
       if (inX) {
         const n = parseInt(inX[1]);
         const unit = inX[2];
         const d = new Date(now);
-        if (unit.startsWith("hour")) d.setTime(d.getTime() + n * MS_HOUR);
-        else if (unit.startsWith("week")) d.setDate(d.getDate() + n * 7);
+        if (unit.startsWith("hour")) { d.setTime(d.getTime() + n * MS_HOUR); return formatISOLocal(d); }
+        if (unit.startsWith("week")) d.setDate(d.getDate() + n * 7);
         else d.setDate(d.getDate() + n);
-        if (!hasTime && !unit.startsWith("hour")) { d.setHours(9, 0, 0, 0); }
-        return formatISOLocal(d);
+        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
-      const slashDate = s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+      const slashDate = base.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
       if (slashDate) {
         const mo = parseInt(slashDate[1]) - 1;
         const day = parseInt(slashDate[2]);
         let year = slashDate[3] ? parseInt(slashDate[3]) : now.getFullYear();
         if (year < 100) year += 2000;
-        if (!hasTime) { hour = 9; min = 0; }
         return makeDate(year, mo, day, hour, min);
       }
 
@@ -563,7 +551,6 @@
         /^(.+?)\s+(today(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s+\d{1,2}(?:[,\s]+\d{4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
-        /^(.+?)\s+(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*(?:[,\s]+\d{4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
       ];
       for (const re of patterns) {
         const m = s.match(re);
