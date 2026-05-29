@@ -482,21 +482,22 @@
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
-      function nextWeekday(dayName) {
+      function nearestWeekday(dayName, skip) {
         const target = DAYS[dayName];
         if (target === undefined) return null;
         const d = new Date(now);
         let diff = target - d.getDay();
-        if (diff <= 0) diff += 7;
+        if (diff < 0) diff += 7;
+        if (skip) diff += 7;
         d.setDate(d.getDate() + diff);
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
 
       const nextDay = base.match(/^next\s+(\w+)$/);
-      if (nextDay) { const r = nextWeekday(nextDay[1]); if (r) return r; }
+      if (nextDay) { const r = nearestWeekday(nextDay[1], true); if (r) return r; }
 
       const bareDay = base.match(/^(\w+)$/);
-      if (bareDay) { const r = nextWeekday(bareDay[1]); if (r) return r; }
+      if (bareDay) { const r = nearestWeekday(bareDay[1], false); if (r) return r; }
 
       for (const [name, idx] of Object.entries(MONTHS)) {
         const m = base.match(new RegExp("^" + name + "\\s+(\\d{1,2})(?:[,\\s]+(\\d{4}))?$"));
