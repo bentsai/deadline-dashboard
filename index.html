@@ -241,12 +241,6 @@
       font-weight: 400;
       color: var(--muted);
     }
-    .inline-error {
-      font-family: var(--font);
-      font-size: .8rem;
-      font-weight: 700;
-      color: var(--danger);
-    }
     .inline-actions { display: flex; align-items: center; gap: .75rem; margin-top: .5rem; }
     .inline-actions button {
       padding: .4rem .75rem;
@@ -270,7 +264,6 @@
       & .inline-actions button.danger:hover { color: var(--danger); }
       & .inline-input { border-color: #ccc; color: var(--card-fg); }
       & .inline-input:focus { border-color: var(--card-fg); }
-      & .inline-error { color: var(--danger); }
     }
     .card:hover, .card:focus { outline-color: var(--accent); }
     .card:focus { outline-style: solid; }
@@ -646,8 +639,7 @@
         addCard.removeAttribute("tabindex");
         addCard.classList.add("active");
         addCard.innerHTML = '<textarea class="inline-input" id="add-input" rows="2" placeholder="Project proposal due June 15"></textarea>'
-          + '<span class="inline-hint">Enter to save. Esc to cancel.</span>'
-          + '<span class="inline-error" id="add-error" aria-live="assertive"></span>';
+          + '<span class="inline-hint">Enter to save. Esc to cancel. No date = today 5pm.</span>';
         const input = document.getElementById("add-input");
         input.focus();
         input.addEventListener("keydown", (e) => {
@@ -673,15 +665,16 @@
       const input = document.getElementById("add-input");
       if (!input) return;
       const val = input.value.trim();
-      const err = document.getElementById("add-error");
       if (!val) { render(); return; }
       const result = splitInput(val);
-      if (!result) { if (err) err.textContent = "Include a date, e.g. \"Report due May 30\""; return; }
+      const name = result ? result.name : val;
+      const now = new Date();
+      const date = result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0);
       addingWhen = true;
       const whens = load();
-      whens.push({name: result.name, date: result.date});
+      whens.push({name: name, date: date});
       save(whens);
-      flashTarget = result.name;
+      flashTarget = name;
       render();
       addingWhen = false;
     }
@@ -701,7 +694,6 @@
       const d = whens[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
-        + '<span class="inline-error" id="edit-error" aria-live="assertive"></span>'
         + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
@@ -713,9 +705,11 @@
         const val = input.value.trim();
         if (!val) { render(); return; }
         const result = splitInput(val);
-        if (!result) { saved = false; document.getElementById("edit-error").textContent = "Include a date"; return; }
+        const name = result ? result.name : val;
+        const now = new Date();
+        const date = result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0);
         const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) { all[ri] = {name: result.name, date: result.date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
+        if (ri !== -1) { all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
         render();
       }
       input.addEventListener("keydown", (e) => {
