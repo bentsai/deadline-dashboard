@@ -263,6 +263,7 @@
       min-width: 44px;
     }
     .inline-actions button:hover { color: var(--fg); }
+    .inline-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .inline-actions button.done-btn { color: var(--done-bg); }
     .inline-actions button.done-btn:hover { color: #2da653; }
     .inline-actions button.danger { color: var(--muted); }
@@ -727,8 +728,8 @@
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") render();
       });
-      document.getElementById("edit-done").addEventListener("mousedown", (e) => {
-        e.preventDefault(); e.stopPropagation();
+      document.getElementById("edit-done").addEventListener("click", (e) => {
+        e.stopPropagation();
         saved = true;
         const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) {
@@ -739,14 +740,17 @@
         }
         render();
       });
-      document.getElementById("edit-delete").addEventListener("mousedown", (e) => {
-        e.preventDefault(); e.stopPropagation();
+      document.getElementById("edit-delete").addEventListener("click", (e) => {
+        e.stopPropagation();
         saved = true;
         const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) { all.splice(ri, 1); save(all); }
         render();
       });
       card.addEventListener("click", (e) => e.stopPropagation());
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { e.preventDefault(); render(); }
+      });
     }
 
     function renderWhat() {
@@ -862,8 +866,7 @@
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") renderWhat();
       });
-      document.getElementById("what-edit-delete").addEventListener("mousedown", (e) => {
-        e.preventDefault();
+      document.getElementById("what-edit-delete").addEventListener("click", (e) => {
         e.stopPropagation();
         saved = true;
         cards.splice(idx, 1);
@@ -871,6 +874,9 @@
         renderWhat();
       });
       card.addEventListener("click", (e) => e.stopPropagation());
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { e.preventDefault(); renderWhat(); }
+      });
     }
 
     function escHtml(s) {
