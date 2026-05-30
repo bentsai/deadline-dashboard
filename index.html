@@ -122,7 +122,10 @@
     .card.urgent .stamp { opacity: .25; }
     .card.soon .stamp { font-size: 16rem; }
     .card > *:not(.stamp) { position: relative; z-index: 1; }
-    .card.editing .inline-actions { position: static; }
+    .card.editing .inline-actions { position: static; display: grid; grid-template-columns: 1fr auto 1fr; }
+    .card.editing #edit-save { justify-self: start; }
+    .card.editing #edit-cancel { justify-self: end; }
+    .what-card.editing .inline-actions { justify-content: space-between; }
     .card.urgent {
       background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
       & .card-date { color: var(--fg); }
@@ -706,7 +709,7 @@
       const d = whens[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
-        + '<div class="inline-actions"><button id="edit-done">' + (d.done ? "mark undone" : "mark done") + '</button><button id="edit-save">save</button><button id="edit-cancel">cancel</button><button class="card-delete danger" id="edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><button id="edit-save">save</button><button id="edit-done">' + (d.done ? "mark undone" : "mark done") + '</button><button id="edit-cancel">cancel</button><button class="card-delete danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
