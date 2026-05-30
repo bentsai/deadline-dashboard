@@ -719,10 +719,7 @@
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
-      let saved = false;
       function trySave() {
-        if (saved) return;
-        saved = true;
         const val = input.value.trim();
         if (!val) { render(); return; }
         const {name, date} = parseWhenInput(val);
@@ -864,10 +861,7 @@
       const input = document.getElementById("what-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
-      let saved = false;
       function trySave() {
-        if (saved) return;
-        saved = true;
         const val = input.value.trim();
         if (!val) { renderWhat(); return; }
         cards[idx] = {text: val};
