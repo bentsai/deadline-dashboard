@@ -673,6 +673,15 @@
       grid.appendChild(addCard);
     }
 
+    function parseWhenInput(val) {
+      const result = splitInput(val);
+      const now = new Date();
+      return {
+        name: result ? result.name : val,
+        date: result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0)
+      };
+    }
+
     let addingWhen = false;
     let flashTarget = null;
     function doAdd() {
@@ -681,10 +690,7 @@
       if (!input) return;
       const val = input.value.trim();
       if (!val) { render(); return; }
-      const result = splitInput(val);
-      const name = result ? result.name : val;
-      const now = new Date();
-      const date = result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0);
+      const {name, date} = parseWhenInput(val);
       addingWhen = true;
       const whens = load();
       whens.push({name: name, date: date});
@@ -719,10 +725,7 @@
         saved = true;
         const val = input.value.trim();
         if (!val) { render(); return; }
-        const result = splitInput(val);
-        const name = result ? result.name : val;
-        const now = new Date();
-        const date = result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0);
+        const {name, date} = parseWhenInput(val);
         const {all, ri} = findWhen(origName, origDate);
         if (ri !== -1) { all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
         render();
