@@ -269,7 +269,7 @@
     }
     .inline-actions button:hover { color: var(--fg); }
     .inline-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .inline-actions button.card-delete { position: absolute; top: .5rem; right: .5rem; font-size: 2rem; line-height: 1; text-decoration: none; min-width: 0; padding: .25rem 1.5rem; }
+    .inline-actions button.card-delete { position: absolute; top: .5rem; right: .5rem; }
     .inline-actions button.danger { color: var(--muted); }
     .inline-actions button.danger:hover { color: var(--danger); }
     .card.ok {
@@ -715,7 +715,7 @@
       const d = whens[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
-        + '<div class="inline-actions"><button id="edit-save">save</button><button id="edit-done">' + (d.done ? "mark undone" : "mark done") + '</button><button id="edit-cancel">cancel</button><button class="card-delete danger" id="edit-delete" aria-label="delete" title="delete">&times;</button></div>';
+        + '<div class="inline-actions"><button id="edit-save">save</button><button id="edit-done">' + (d.done ? "mark undone" : "mark done") + '</button><button id="edit-cancel">cancel</button><button class="card-delete danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -857,7 +857,7 @@
       card.classList.add("editing");
       const cards = loadWhat();
       card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
-        + '<div class="inline-actions"><button id="what-edit-save">save</button><button id="what-edit-cancel">cancel</button><button class="card-delete danger" id="what-edit-delete" aria-label="delete" title="delete">&times;</button></div>';
+        + '<div class="inline-actions"><button id="what-edit-save">save</button><button id="what-edit-cancel">cancel</button><button class="card-delete danger" id="what-edit-delete">delete</button></div>';
       const input = document.getElementById("what-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
