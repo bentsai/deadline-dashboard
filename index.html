@@ -265,8 +265,8 @@
     }
     .inline-actions button:hover { color: var(--fg); }
     .inline-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .inline-actions button.done-btn { color: var(--done-bg); }
-    .inline-actions button.done-btn:hover { color: #2da653; }
+    .inline-actions label { display: inline-flex; align-items: center; gap: .4rem; color: inherit; cursor: pointer; font: 400 .95rem var(--font); }
+    .inline-actions input[type=checkbox] { width: 1.1rem; height: 1.1rem; accent-color: var(--done-bg); cursor: pointer; }
     .inline-actions button.danger { color: var(--muted); }
     .inline-actions button.danger:hover { color: var(--danger); text-decoration: underline; }
     .card.ok {
@@ -706,7 +706,7 @@
       const d = whens[idx];
       const origName = d.name, origDate = d.date;
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
-        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="done-btn" id="edit-done">' + (d.done ? "undo" : "done") + '</button><button class="danger" id="edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><label><input type="checkbox" id="edit-done"' + (d.done ? " checked" : "") + '>done</label><button id="edit-save">save</button><button class="danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -720,8 +720,15 @@
         const name = result ? result.name : val;
         const now = new Date();
         const date = result ? result.date : makeDate(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0);
+        const done = document.getElementById("edit-done").checked;
         const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) { all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
+        if (ri !== -1) {
+          let doneAt = all[ri].doneAt;
+          if (done && !all[ri].done) doneAt = new Date().toISOString();
+          if (!done) doneAt = undefined;
+          all[ri] = {name: name, date: date, done: done, doneAt: doneAt};
+          save(all);
+        }
         render();
       }
       input.addEventListener("keydown", (e) => {
@@ -729,16 +736,9 @@
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") render();
       });
-      document.getElementById("edit-done").addEventListener("click", (e) => {
+      document.getElementById("edit-save").addEventListener("click", (e) => {
         e.stopPropagation();
-        const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) {
-          all[ri].done = !d.done;
-          if (all[ri].done) all[ri].doneAt = new Date().toISOString();
-          else delete all[ri].doneAt;
-          save(all);
-        }
-        render();
+        trySave();
       });
       document.getElementById("edit-delete").addEventListener("click", (e) => {
         e.stopPropagation();
@@ -846,7 +846,7 @@
       card.classList.add("editing");
       const cards = loadWhat();
       card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
-        + '<div class="inline-actions"><span class="inline-hint">Enter to save. Esc to cancel.</span><button class="danger" id="what-edit-delete">delete</button></div>';
+        + '<div class="inline-actions"><button id="what-edit-save">save</button><button class="danger" id="what-edit-delete">delete</button></div>';
       const input = document.getElementById("what-edit-input");
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -864,6 +864,10 @@
         e.stopPropagation();
         if (e.key === "Enter") { e.preventDefault(); trySave(); }
         if (e.key === "Escape") renderWhat();
+      });
+      document.getElementById("what-edit-save").addEventListener("click", (e) => {
+        e.stopPropagation();
+        trySave();
       });
       document.getElementById("what-edit-delete").addEventListener("click", (e) => {
         e.stopPropagation();
