@@ -17,12 +17,14 @@ There is **no build step, no bundler, no test suite, no dependencies**. The enti
 
 Everything — markup, CSS, and JS — lives inline in `index.html`. Treat that single file as the whole codebase.
 
-- **Three sections, three independent localStorage keys**, each with its own load/save/render pair:
-  - **When** (`whatandwhen-when-v1`) — countdown cards with due dates. `load`/`save`/`render`.
+- **Three sections, three independent localStorage keys**, each with its own load/save/render pair. They stack full-width in source/visual order — **What**, then **When**, then **Words** — under a pinned top cluster (wordmark · export · theme toggle):
   - **What** (`whatandwhen-what-v1`) — top-of-mind cards, drag-reorderable. `loadWhat`/`saveWhat`/`renderWhat`.
+  - **When** (`whatandwhen-when-v1`) — countdown cards with due dates. `load`/`save`/`render`.
   - **Words** (`whatandwhen-words-v1`) — a debounced scratch textarea. `loadWords`/`saveWords`.
 - **localStorage is the only data store** — no server, no accounts, no sync. Corrupt JSON is caught and reseeded (`makeSeed` / `WHAT_SEED`). Seed data is generated relative to `new Date()` so the demo always looks current.
-- **Render model is full-redraw.** `render()` / `renderWhat()` wipe the grid (`innerHTML = ""`) and rebuild every card from state on each change. Inline editing swaps a card's `innerHTML` for a `<textarea>` + action buttons. A 60s `setInterval` re-renders to keep countdowns live, but **skips while a `.editing` card is open** — preserve this guard when touching the interval or edit flow.
+- **Render model is full-redraw.** `render()` / `renderWhat()` wipe the grid (`innerHTML = ""`) and rebuild every card from state on each change. Inline editing swaps a card's `innerHTML` for a `<textarea>` + action buttons. A 60s `setInterval` re-renders to keep countdowns live, but **skips while a `.editing` or `.add-card` card is open** — preserve this guard when touching the interval, edit, or add flow.
+- **Adding a card** is driven by a `+` button in each section header (When/What), not a placeholder card in the grid. `showWhenAdd()` / `showWhatAdd()` append a one-off `.add-card` with an inline `<textarea>` at the end of the grid; Enter saves, Esc/empty-blur dismisses, non-empty blur saves. The grids themselves only ever hold real cards.
+- **Layout is pure stacked flow.** Each section is a full-width `.section`; the When and What card grids are CSS grid with `repeat(auto-fill, minmax(min(var(--grid-min), 100%), 1fr))` — the `min(…, 100%)` clamp lets cards shrink to a single fitting column on narrow viewports (phones) instead of overflowing. There is no separate mobile breakpoint.
 - **The LCP element is JS-rendered** (the big `.card-days` number). The static HTML ships empty `#grid`/`#what-grid`. Keep the app logic inline and synchronous in `<head>`/end-of-`<body>`; moving it to an external/deferred script or adding a fetch would turn cheap render-delay into a request chain and regress LCP. The app is non-functional without JS by design (client-only localStorage app).
 
 ### Date parsing (`parseDate` / `splitInput` / `extractTime`)

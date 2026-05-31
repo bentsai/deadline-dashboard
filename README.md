@@ -10,9 +10,11 @@ This is not meant for task breakdowns or managing projects. No notifications. No
 
 ## Terminology
 
-- **When** — countdown cards with due dates
 - **What** — cards for what's top of mind right now
+- **When** — countdown cards with due dates
 - **Words** — scratch space for notes
+
+Add a card to the What or When section with the **+** button in that section's header.
 
 ## Running
 
@@ -30,7 +32,7 @@ All data lives in your browser's localStorage. There is no cloud sync, no accoun
 
 ## Export / Import
 
-Click "export" in the bottom-right corner. This encodes all your data (When cards, What cards, and Words notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
+Click "export" in the top-right corner. This encodes all your data (When cards, What cards, and Words notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
 
 ## Features
 
