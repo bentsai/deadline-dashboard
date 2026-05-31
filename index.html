@@ -148,8 +148,8 @@
     .card.editing #edit-save { justify-self: start; }
     .card.editing #edit-cancel { justify-self: end; }
     .what-card.editing .inline-actions { justify-content: space-between; }
-    .card.urgent {
-      background: var(--urgent-bg); color: var(--on-color); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
+    .card.urgent, .card.done {
+      color: var(--on-color);
       & .card-date { color: var(--on-color); }
       & .label { color: var(--on-dark); }
       & .inline-hint { color: var(--on-dark-muted); }
@@ -159,6 +159,7 @@
       & .inline-input { border-color: var(--on-dark-dim); color: var(--on-color); }
       & .inline-input:focus { border-color: var(--on-color); }
     }
+    .card.urgent { background: var(--urgent-bg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg); }
     .card.soon {
       background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
       & .card-date { color: var(--soon-fg); }
@@ -176,17 +177,7 @@
       & .card-days { color: var(--past-fg); }
       & .label { color: var(--past-fg); }
     }
-    .card.done {
-      background: var(--done-bg); color: var(--on-color); border-color: var(--done-bg); outline-color: var(--done-bg);
-      & .card-date { color: var(--on-color); }
-      & .label { color: var(--on-dark); }
-      & .inline-hint { color: var(--on-dark-muted); }
-      & .inline-actions button { color: var(--on-dark-muted); }
-      & .inline-actions button:hover { color: var(--on-color); }
-      & .inline-actions button.danger:hover { color: var(--accent-bright); }
-      & .inline-input { border-color: var(--on-dark-dim); color: var(--on-color); }
-      & .inline-input:focus { border-color: var(--on-color); }
-    }
+    .card.done { background: var(--done-bg); border-color: var(--done-bg); outline-color: var(--done-bg); }
     .card-name {
       font-size: 1.4rem;
       font-weight: 900;
@@ -447,7 +438,9 @@
 
     function load() {
       const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt When data, reseeding", e); }
+      }
       const seed = makeSeed();
       save(seed);
       return seed;
@@ -459,7 +452,9 @@
 
     function loadWhat() {
       const raw = localStorage.getItem(WHAT_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt What data, reseeding", e); }
+      }
       saveWhat(WHAT_SEED);
       return WHAT_SEED;
     }
@@ -921,10 +916,16 @@
       return d.innerHTML;
     }
 
+    function encodeData(obj) {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+    }
+    function decodeData(b64) {
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    }
+
     if (location.hash.startsWith("#data=")) {
       try {
-        const json = atob(location.hash.slice(6));
-        const data = JSON.parse(json);
+        const data = decodeData(location.hash.slice(6));
         if (data.when) save(data.when);
         if (data.what) saveWhat(data.what);
         if (data.words) saveWords(data.words);
@@ -948,7 +949,7 @@
 
     document.getElementById("export-btn").addEventListener("click", function() {
       const data = { when: load(), what: loadWhat(), words: loadWords() };
-      const url = location.origin + location.pathname + "#data=" + btoa(JSON.stringify(data));
+      const url = location.origin + location.pathname + "#data=" + encodeData(data);
       const status = document.getElementById("export-status");
       navigator.clipboard.writeText(url).then(() => {
         this.textContent = "copied!";
