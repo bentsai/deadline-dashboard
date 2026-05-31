@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <title>What &amp; When</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#000">
+  <meta name="theme-color" content="#000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ececec" media="(prefers-color-scheme: light)">
   <meta name="description" content="What &amp; When — a personal dashboard for your due dates and top-of-mind projects">
   <link rel="icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -20,6 +21,7 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400&family=IBM+Plex+Mono:wght@400;700&family=Rubik:wght@400;700;900&family=Rubik+Mono+One&display=swap"></noscript>
   <style>
     :root {
+      color-scheme: dark;
       --bg: #000;
       --fg: #fff;
       --card-bg: #fff;
@@ -28,6 +30,8 @@
       --border-dim: #444;
       --border-hover: #777;
       --accent: #ffcc00;
+      /* bright yellow highlight on the saturated dark urgent/done cards — stays bright in both themes */
+      --accent-bright: #ffcc00;
       --danger: #ff0000;
       --urgent-bg: #cc2200;
       --soon-bg: #ffcc00;
@@ -35,6 +39,8 @@
       --past-bg: #2e2e2e;
       --past-fg: #b0b0b0;
       --done-bg: #1a7a3a;
+      /* white text on saturated (urgent/done) cards — stays white in both themes */
+      --on-color: #fff;
       --on-dark: rgba(255,255,255,.85);
       --on-dark-muted: rgba(255,255,255,.75);
       --on-dark-dim: rgba(255,255,255,.6);
@@ -45,6 +51,22 @@
       --font: "Rubik", sans-serif;
       --font-mono: "Rubik Mono One", monospace;
       --font-scratch: "IBM Plex Mono", monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        color-scheme: light;
+        --bg: #ececec;
+        --fg: #1a1a1a;
+        --card-fg: #1a1a1a;
+        --muted: #5f5f5f;
+        --border-dim: #bcbcbc;
+        --border-hover: #888;
+        --accent: #8a5a00;
+        --past-bg: #dcdcdc;
+        --past-fg: #595959;
+        --what-bg: #f5f5f5;
+        --what-input-bg: #ffffff;
+      }
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     button, a { cursor: pointer; }
@@ -127,15 +149,15 @@
     .card.editing #edit-cancel { justify-self: end; }
     .what-card.editing .inline-actions { justify-content: space-between; }
     .card.urgent {
-      background: var(--urgent-bg); color: var(--fg); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
-      & .card-date { color: var(--fg); }
+      background: var(--urgent-bg); color: var(--on-color); border-color: var(--urgent-bg); outline-color: var(--urgent-bg);
+      & .card-date { color: var(--on-color); }
       & .label { color: var(--on-dark); }
       & .inline-hint { color: var(--on-dark-muted); }
       & .inline-actions button { color: var(--on-dark-muted); }
-      & .inline-actions button:hover { color: var(--fg); }
-      & .inline-actions button.danger:hover { color: var(--accent); }
-      & .inline-input { border-color: var(--on-dark-dim); color: var(--fg); }
-      & .inline-input:focus { border-color: var(--fg); }
+      & .inline-actions button:hover { color: var(--on-color); }
+      & .inline-actions button.danger:hover { color: var(--accent-bright); }
+      & .inline-input { border-color: var(--on-dark-dim); color: var(--on-color); }
+      & .inline-input:focus { border-color: var(--on-color); }
     }
     .card.soon {
       background: var(--soon-bg); color: var(--card-fg); border-color: var(--soon-bg); outline-color: var(--soon-bg);
@@ -155,15 +177,15 @@
       & .label { color: var(--past-fg); }
     }
     .card.done {
-      background: var(--done-bg); color: var(--fg); border-color: var(--done-bg); outline-color: var(--done-bg);
-      & .card-date { color: var(--fg); }
+      background: var(--done-bg); color: var(--on-color); border-color: var(--done-bg); outline-color: var(--done-bg);
+      & .card-date { color: var(--on-color); }
       & .label { color: var(--on-dark); }
       & .inline-hint { color: var(--on-dark-muted); }
       & .inline-actions button { color: var(--on-dark-muted); }
-      & .inline-actions button:hover { color: var(--fg); }
-      & .inline-actions button.danger:hover { color: var(--accent); }
-      & .inline-input { border-color: var(--on-dark-dim); color: var(--fg); }
-      & .inline-input:focus { border-color: var(--fg); }
+      & .inline-actions button:hover { color: var(--on-color); }
+      & .inline-actions button.danger:hover { color: var(--accent-bright); }
+      & .inline-input { border-color: var(--on-dark-dim); color: var(--on-color); }
+      & .inline-input:focus { border-color: var(--on-color); }
     }
     .card-name {
       font-size: 1.4rem;
