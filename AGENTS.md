@@ -18,10 +18,11 @@ There is **no build step, no bundler, no test suite, no dependencies**. The enti
 Everything — markup, CSS, and JS — lives inline in `index.html`. Treat that single file as the whole codebase.
 
 - **Three sections, three independent localStorage keys**, each with its own load/save/render pair. They stack full-width in source/visual order — **What**, then **When**, then **Words** — under a pinned top cluster (wordmark · export · theme toggle):
-  - **What** (`whatandwhen-what-v1`) — top-of-mind cards, drag-reorderable. `loadWhat`/`saveWhat`/`renderWhat`.
-  - **When** (`whatandwhen-when-v1`) — countdown cards with due dates. `load`/`save`/`render`.
-  - **Words** (`whatandwhen-words-v1`) — a debounced scratch textarea. `loadWords`/`saveWords`.
-- **localStorage is the only data store** — no server, no accounts, no sync. Corrupt JSON is caught and reseeded (`makeSeed` / `WHAT_SEED`). Seed data is generated relative to `new Date()` so the demo always looks current.
+  - **What** (`…-what-v1`) — top-of-mind cards, drag-reorderable. `loadWhat`/`saveWhat`/`renderWhat`.
+  - **When** (`…-when-v1`) — countdown cards with due dates. `load`/`save`/`render`.
+  - **Words** (`…-words-v1`) — a debounced scratch textarea. `loadWords`/`saveWords`.
+- **Domains namespace the keys.** The three key consts derive from `keyFor(part)`, which prepends an optional domain from the URL hash (`domainFromHash()` → `DOMAIN`). No hash = the unprefixed default keys (`whatandwhen-when-v1`, etc.) — the original, never-migrated store. A hash like `#work` yields `whatandwhen-work-when-v1` and friends. The domain is lowercased and sanitized to `[a-z0-9-]`; `#data=…` is recognized as an import hash, not a domain. Each domain is fully independent (no global/aggregate view by design). Switching domains is URL-driven: a `hashchange` listener calls `location.reload()` so each domain boots cleanly. Theme is **not** namespaced — it stays global.
+- **localStorage is the only data store** — no server, no accounts, no sync. Corrupt JSON is caught and reseeded (`makeSeed` / `WHAT_SEED`). Seed data is generated relative to `new Date()` so the demo always looks current. **Only the default domain is seeded** — named domains (`DOMAIN` truthy) start empty (`load`/`loadWhat` return `[]`).
 - **Render model is full-redraw.** `render()` / `renderWhat()` wipe the grid (`innerHTML = ""`) and rebuild every card from state on each change. Inline editing swaps a card's `innerHTML` for a `<textarea>` + action buttons. A 60s `setInterval` re-renders to keep countdowns live, but **skips while a `.editing` or `.add-card` card is open** — preserve this guard when touching the interval, edit, or add flow.
 - **Adding a card** is driven by a `+` button in each section header (When/What), not a placeholder card in the grid. `showWhenAdd()` / `showWhatAdd()` append a one-off `.add-card` with an inline `<textarea>` at the end of the grid; Enter saves, Esc/empty-blur dismisses, non-empty blur saves. The grids themselves only ever hold real cards.
 - **Layout is pure stacked flow.** Each section is a full-width `.section`; the When and What card grids are CSS grid with `repeat(auto-fill, minmax(min(var(--grid-min), 100%), 1fr))` — the `min(…, 100%)` clamp lets cards shrink to a single fitting column on narrow viewports (phones) instead of overflowing. There is no separate mobile breakpoint.
@@ -36,8 +37,9 @@ Natural-language date entry is the most intricate logic. `splitInput` separates 
 
 ### Other behaviors
 
-- **Theme:** dark default; `prefers-color-scheme` + a manual toggle persisted to `whatandwhen-theme-v1`. A tiny pre-paint inline script in `<head>` applies the saved theme before first paint to avoid a flash — keep it inline and first.
-- **Export/import:** "export" base64-encodes all three stores into a `#data=` URL fragment (`encodeData`/`decodeData`, using `encodeURIComponent`+`unescape` to survive Unicode). On load, a `#data=` hash imports then clears via `history.replaceState`.
+- **Theme:** dark default; `prefers-color-scheme` + a manual toggle persisted to `whatandwhen-theme-v1` (global — not per-domain). A tiny pre-paint inline script in `<head>` applies the saved theme before first paint to avoid a flash — keep it inline and first, and do not make it domain-aware.
+- **Export/import:** "export" base64-encodes the current domain's three stores **plus a `domain` field** into a `#data=` URL fragment (`encodeData`/`decodeData`, using `encodeURIComponent`+`unescape` to survive Unicode). On load, a `#data=` hash imports into the payload's domain's keys; if that domain matches the current one it clears the hash via `history.replaceState`, otherwise it `location.replace`s to `#<domain>` for a clean load. Payloads with no `domain` field import into the default domain (backward-compatible with pre-domains export links).
+- **Domain label:** when `DOMAIN` is set, init appends a `·`-separated tag (reusing `.wordmark`/`.cluster-sep`, set via `textContent`) after the wordmark and updates `document.title`. Default domain shows no extra label.
 - All user text goes through `escHtml()` before insertion. Card content is built with `innerHTML` string concatenation — any new dynamic text must be escaped the same way.
 - Fonts load non-render-blocking via the `media="print" onload` swap with a `<noscript>` fallback. Preserve that pattern.
 

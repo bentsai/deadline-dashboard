@@ -30,9 +30,19 @@ python3 -m http.server 8080
 
 All data lives in your browser's localStorage. There is no cloud sync, no accounts, no server-side storage. Your data never leaves your machine.
 
+## Domains
+
+Keep separate areas of life apart by adding a name to the URL hash:
+
+- `whatandwhen.fyi/` — your default board
+- `whatandwhen.fyi/#work` — a separate, independent board for work
+- `whatandwhen.fyi/#personal` — another independent board
+
+Each domain has its own What, When, and Words. A new domain starts empty, and its name shows in the header so you always know where you are. Bookmark the URLs to jump between them. There's no combined view — each board stands alone. (Your theme choice is shared across all domains.)
+
 ## Export / Import
 
-Click "export" in the top-right corner. This encodes all your data (When cards, What cards, and Words notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything. The import is a one-time snapshot — changes made afterward are independent in each browser.
+Click "export" in the top-right corner. This encodes the current board's data (When cards, What cards, and Words notes) into a URL with a base64 hash fragment. Copy the URL and open it in another browser to import everything — it lands in the same domain it came from. The import is a one-time snapshot — changes made afterward are independent in each browser.
 
 ## Features
 

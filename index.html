@@ -417,15 +417,25 @@
       {text: "Read RFC on new auth flow"}
     ];
 
-    const KEY = "whatandwhen-when-v1";
-    const WHAT_KEY = "whatandwhen-what-v1";
+    function domainFromHash() {
+      const h = decodeURIComponent(location.hash.slice(1)).toLowerCase().trim();
+      if (h.startsWith("data=")) return "";        // export/import hash, not a domain
+      return h.replace(/[^a-z0-9-]/g, "");         // sanitize; empty => default domain
+    }
+    const DOMAIN = domainFromHash();
+    function keyFor(part) {
+      return "whatandwhen-" + (DOMAIN ? DOMAIN + "-" : "") + part + "-v1";
+    }
+
+    const KEY = keyFor("when");
+    const WHAT_KEY = keyFor("what");
 
     function load() {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt When data, reseeding", e); }
       }
-      const seed = makeSeed();
+      const seed = DOMAIN ? [] : makeSeed();
       save(seed);
       return seed;
     }
@@ -439,15 +449,16 @@
       if (raw) {
         try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt What data, reseeding", e); }
       }
-      saveWhat(WHAT_SEED);
-      return WHAT_SEED;
+      const seed = DOMAIN ? [] : WHAT_SEED;
+      saveWhat(seed);
+      return seed;
     }
 
     function saveWhat(cards) {
       localStorage.setItem(WHAT_KEY, JSON.stringify(cards));
     }
 
-    const WORDS_KEY = "whatandwhen-words-v1";
+    const WORDS_KEY = keyFor("words");
     function loadWords() { return localStorage.getItem(WORDS_KEY) || ""; }
     function saveWords(text) { localStorage.setItem(WORDS_KEY, text); }
 
@@ -890,17 +901,39 @@
     if (location.hash.startsWith("#data=")) {
       try {
         const data = decodeData(location.hash.slice(6));
-        if (data.when) save(data.when);
-        if (data.what) saveWhat(data.what);
-        if (data.words) saveWords(data.words);
-      } catch(e) { console.warn("Failed to import data from URL hash", e); }
-      history.replaceState(null, "", location.pathname);
+        const dom = (data.domain || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
+        const k = part => "whatandwhen-" + (dom ? dom + "-" : "") + part + "-v1";
+        if (data.when) localStorage.setItem(k("when"), JSON.stringify(data.when));
+        if (data.what) localStorage.setItem(k("what"), JSON.stringify(data.what));
+        if (typeof data.words === "string") localStorage.setItem(k("words"), data.words);
+        if (dom === DOMAIN) {
+          history.replaceState(null, "", location.pathname);  // same domain: clear hash, no reload
+        } else {
+          location.replace(location.pathname + "#" + dom);     // different domain: navigate + fresh load
+        }
+      } catch(e) {
+        console.warn("Failed to import data from URL hash", e);
+        history.replaceState(null, "", location.pathname);
+      }
+    }
+
+    if (DOMAIN) {
+      document.title = "What & When · " + DOMAIN;
+      const sep = document.createElement("span");
+      sep.className = "cluster-sep";
+      sep.setAttribute("aria-hidden", "true");
+      sep.textContent = "·";
+      const tag = document.createElement("span");
+      tag.className = "wordmark";
+      tag.textContent = DOMAIN;
+      document.querySelector(".wordmark").after(sep, tag);
     }
 
     render();
     renderWhat();
     document.getElementById("when-add-btn").addEventListener("click", showWhenAdd);
     document.getElementById("what-add-btn").addEventListener("click", showWhatAdd);
+    addEventListener("hashchange", () => location.reload());
     setInterval(() => {
       if (!document.querySelector(".editing, .add-card")) { render(); renderWhat(); }
     }, 60000);
@@ -914,7 +947,7 @@
     });
 
     document.getElementById("export-btn").addEventListener("click", function() {
-      const data = { when: load(), what: loadWhat(), words: loadWords() };
+      const data = { domain: DOMAIN, when: load(), what: loadWhat(), words: loadWords() };
       const url = location.origin + location.pathname + "#data=" + encodeData(data);
       const status = document.getElementById("export-status");
       navigator.clipboard.writeText(url).then(() => {
