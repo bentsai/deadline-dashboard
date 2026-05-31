@@ -117,10 +117,10 @@
       font-weight: 400;
       font-style: italic;
       font-variation-settings: "opsz" 144;
-      font-size: 2.5rem;
+      font-size: 4rem;
       letter-spacing: -.01em;
       color: var(--muted);
-      margin-bottom: 2rem;
+      margin-right: auto;
     }
     .cluster-link {
       color: var(--muted);
@@ -929,10 +929,10 @@
 
     if (DOMAIN) {
       document.title = "What & When · " + DOMAIN;
-      const label = document.createElement("div");
+      const label = document.createElement("span");
       label.className = "domain-label";
       label.textContent = DOMAIN;
-      document.querySelector(".cluster").after(label);
+      document.querySelector(".cluster").prepend(label);
     }
 
     render();
