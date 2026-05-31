@@ -112,6 +112,16 @@
       letter-spacing: -.01em;
       color: var(--muted);
     }
+    .domain-label {
+      font-family: "Fraunces", serif;
+      font-weight: 400;
+      font-style: italic;
+      font-variation-settings: "opsz" 144;
+      font-size: 2.5rem;
+      letter-spacing: -.01em;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
     .cluster-link {
       color: var(--muted);
       font-family: var(--font);
@@ -919,14 +929,10 @@
 
     if (DOMAIN) {
       document.title = "What & When · " + DOMAIN;
-      const sep = document.createElement("span");
-      sep.className = "cluster-sep";
-      sep.setAttribute("aria-hidden", "true");
-      sep.textContent = "·";
-      const tag = document.createElement("span");
-      tag.className = "wordmark";
-      tag.textContent = DOMAIN;
-      document.querySelector(".wordmark").after(sep, tag);
+      const label = document.createElement("div");
+      label.className = "domain-label";
+      label.textContent = DOMAIN;
+      document.querySelector(".cluster").after(label);
     }
 
     render();
