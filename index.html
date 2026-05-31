@@ -433,8 +433,8 @@
       return h.replace(/[^a-z0-9-]/g, "");         // sanitize; empty => default domain
     }
     const DOMAIN = domainFromHash();
-    function keyFor(part) {
-      return "whatandwhen-" + (DOMAIN ? DOMAIN + "-" : "") + part + "-v1";
+    function keyFor(part, domain = DOMAIN) {
+      return "whatandwhen-" + (domain ? domain + "-" : "") + part + "-v1";
     }
 
     const KEY = keyFor("when");
@@ -912,10 +912,9 @@
       try {
         const data = decodeData(location.hash.slice(6));
         const dom = (data.domain || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
-        const k = part => "whatandwhen-" + (dom ? dom + "-" : "") + part + "-v1";
-        if (data.when) localStorage.setItem(k("when"), JSON.stringify(data.when));
-        if (data.what) localStorage.setItem(k("what"), JSON.stringify(data.what));
-        if (typeof data.words === "string") localStorage.setItem(k("words"), data.words);
+        if (data.when) localStorage.setItem(keyFor("when", dom), JSON.stringify(data.when));
+        if (data.what) localStorage.setItem(keyFor("what", dom), JSON.stringify(data.what));
+        if (typeof data.words === "string") localStorage.setItem(keyFor("words", dom), data.words);
         if (dom === DOMAIN) {
           history.replaceState(null, "", location.pathname);  // same domain: clear hash, no reload
         } else {
