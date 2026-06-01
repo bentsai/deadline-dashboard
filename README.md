@@ -65,6 +65,7 @@ When adding a When card, type a name followed by a date. If no date is detected,
 | `Meeting tomorrow at 3pm` | Tomorrow at 3:00 PM |
 | `Ship feature friday` | Nearest Friday (including today) at 9:00 AM |
 | `Demo next wednesday` | Wednesday after the nearest one, at 9:00 AM |
+| `Do something next week` | 7 days from now at 9:00 AM |
 | `Proposal in 3 days` | 3 days from now at 9:00 AM |
 | `Deploy in 2 weeks` | 14 days from now at 9:00 AM |
 | `Reminder in 4 hours` | 4 hours from now (exact time) |

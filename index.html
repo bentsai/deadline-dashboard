@@ -516,6 +516,10 @@
         const d = new Date(now); d.setDate(d.getDate() + 1);
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
+      if (base === "next week") {       // synonym for "in 1 week" — +7 days
+        const d = new Date(now); d.setDate(d.getDate() + 7);
+        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
+      }
 
       function nearestWeekday(dayName, skip) {
         const target = DAYS[dayName];
@@ -576,6 +580,7 @@
       const patterns = [
         /^(.+?)\s+(in\s+\d+\s+(?:day|days|hour|hours|week|weeks))\s*$/i,
         /^(.+?)\s+((?:next\s+)?(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
+        /^(.+?)\s+(next\s+week(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(tomorrow(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(today(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
         /^(.+?)\s+(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?:\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?)\s*$/i,
