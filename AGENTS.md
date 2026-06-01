@@ -12,7 +12,14 @@ There is **no build step, no bundler, no dependencies**. The app itself is one f
 
 - Develop: open `index.html` directly, or `python3 -m http.server 8080` and visit it.
 - **Tier 1 — fast logic tests (`node --test test.mjs`, ~60ms, no browser, zero deps).** Covers the pure logic: `parseDate`/`splitInput`/`extractTime`, `urgency`, `timeUntil`, and the `encodeData`/`decodeData` export codec. The harness reads `index.html`, evaluates its main `<script>` in a `vm` sandbox with stubbed `document`/`localStorage`/`location`, then calls the functions — so it tests the **actually-shipped code, not a copy** (no drift). When you change date-parsing or urgency logic, add/adjust a case here; don't reach for the browser to verify pure logic.
-- **Tier 2 — manual browser verification.** For DOM-dependent interactions only: inline add/edit flows, the `wireInput` blur latch, drag-reorder, the `setInterval` edit-guard, theme toggle, clipboard export. No automated browser harness yet; verify by hand. There is no lint config or CI.
+- **Tier 2 — browser verification.** For DOM-dependent interactions only: inline add/edit flows, the `wireInput` blur latch, drag-reorder, the `setInterval` edit-guard, theme toggle, clipboard export. No automated browser harness yet; drive it with one browser tool by hand. There is no lint config or CI.
+
+  **Browser testing recipe** (keeps browser-driven runs cheap — this is a client-only localStorage app with no network and synchronous rendering, so most setup cost is avoidable):
+  1. **One tool, not both.** Playwright MCP *or* chrome-devtools MCP drives Chrome — running both spawns two browser stacks for one job. Default to Playwright for interaction tests; reach for chrome-devtools only when you need its specialties (perf traces, network panel, Lighthouse, console inspection).
+  2. **Inject state, don't build it through the UI.** Don't click `+` and type to create fixtures. `evaluate` a `localStorage.setItem("whatandwhen-when-v1", JSON.stringify([...]))` then `location.reload()` — the app reads all state from localStorage on load, so you land directly in the state under test. Keys: `whatandwhen-{when,what,words}-v1`.
+  3. **Use a throwaway domain.** Navigate to `index.html#qa` to get the isolated `whatandwhen-qa-*` keyspace (named domains start empty, aren't seeded), so tests never touch real default-domain data and start from a clean slate.
+  4. **Assert by reading the DOM, not screenshotting.** Use `evaluate` / accessibility snapshot and assert on text or class (e.g. card got `.urgent`). Reserve screenshots for genuinely visual checks (e.g. a hover color).
+  5. **Don't wait — rendering is synchronous.** `render()` has no fetch/async hydration, so drop arbitrary `wait_for(timeout)` between action and assertion. Only wait for the two real timers: the 300ms Words-save debounce and the 2s export "copied!" reset.
 
 ## Architecture
 
