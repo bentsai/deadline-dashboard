@@ -78,9 +78,14 @@
     .cluster {
       display: flex;
       justify-content: flex-end;
-      align-items: baseline;
+      align-items: flex-start;
       gap: .65rem;
       margin-bottom: 0.5rem;
+    }
+    .cluster-controls {
+      display: flex;
+      align-items: baseline;
+      gap: .65rem;
     }
     .section-head {
       display: flex;
@@ -358,11 +363,13 @@
 <body>
   <main>
     <div class="cluster">
-      <span class="wordmark">What &amp; When</span>
-      <span class="cluster-sep" aria-hidden="true">·</span>
-      <button class="cluster-link" id="export-btn" type="button">export</button>
-      <span class="cluster-sep" aria-hidden="true">·</span>
-      <button class="cluster-link theme-toggle" id="theme-btn" type="button" aria-label="Switch theme"></button>
+      <div class="cluster-controls">
+        <span class="wordmark">What &amp; When</span>
+        <span class="cluster-sep" aria-hidden="true">·</span>
+        <button class="cluster-link" id="export-btn" type="button">export</button>
+        <span class="cluster-sep" aria-hidden="true">·</span>
+        <button class="cluster-link theme-toggle" id="theme-btn" type="button" aria-label="Switch theme"></button>
+      </div>
     </div>
     <span id="export-status" aria-live="polite"></span>
     <section class="section">
