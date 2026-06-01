@@ -8,10 +8,11 @@ Guidance for AI agents (and humans) working in this repository.
 
 ## Running & testing
 
-There is **no build step, no bundler, no test suite, no dependencies**. The entire app is one file: `index.html`.
+There is **no build step, no bundler, no dependencies**. The app itself is one file: `index.html`. Testing is two-tier — favor the fast tier and reach for the browser only when behavior is genuinely DOM-dependent.
 
 - Develop: open `index.html` directly, or `python3 -m http.server 8080` and visit it.
-- "Test" = manual verification in a browser. There is no lint config or CI.
+- **Tier 1 — fast logic tests (`node --test test.mjs`, ~60ms, no browser, zero deps).** Covers the pure logic: `parseDate`/`splitInput`/`extractTime`, `urgency`, `timeUntil`, and the `encodeData`/`decodeData` export codec. The harness reads `index.html`, evaluates its main `<script>` in a `vm` sandbox with stubbed `document`/`localStorage`/`location`, then calls the functions — so it tests the **actually-shipped code, not a copy** (no drift). When you change date-parsing or urgency logic, add/adjust a case here; don't reach for the browser to verify pure logic.
+- **Tier 2 — manual browser verification.** For DOM-dependent interactions only: inline add/edit flows, the `wireInput` blur latch, drag-reorder, the `setInterval` edit-guard, theme toggle, clipboard export. No automated browser harness yet; verify by hand. There is no lint config or CI.
 
 ## Architecture
 
