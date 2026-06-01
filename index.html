@@ -852,6 +852,7 @@
     function startWhatEdit(card, idx) {
       if (card.classList.contains("editing")) return;
       card.classList.add("editing");
+      card.draggable = false; // let the textarea handle drag-to-select
       const cards = loadWhat();
       card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
         + '<div class="inline-actions"><button id="what-edit-save">save</button><button id="what-edit-cancel">cancel</button><button class="card-delete danger" id="what-edit-delete">delete</button></div>';
