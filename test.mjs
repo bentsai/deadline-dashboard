@@ -77,7 +77,7 @@ vm.createContext(sandbox);
 vm.runInContext(source, sandbox, { filename: "index.html#script" });
 
 // Top-level `function` declarations land on the sandbox; pull out what we test.
-const { parseDate, splitInput, extractTime, urgency, timeUntil, encodeData, decodeData } = sandbox;
+const { parseDate, splitInput, extractTime, urgency, timeUntil, formatForEdit, encodeData, decodeData } = sandbox;
 
 // --- helpers for relative-date assertions (avoid hardcoding today) -----------
 const MS_HOUR = 3600000;
@@ -192,6 +192,37 @@ test("extractTime: peels trailing 'at 3pm'", () => {
   assert.equal(r.hour, 15);
   assert.equal(r.min, 0);
   assert.equal(r.rest, "dec 25");
+});
+
+// --- formatForEdit -----------------------------------------------------------
+// Guards the inline-edit path: a card's stored date is rendered into the edit
+// textarea by formatForEdit, then re-parsed on save. The displayed phrase must
+// parse back to the same instant. formatForEdit always emits an explicit year,
+// so parseDate honors it verbatim (no rollover) and we can compare exactly.
+const roundTrip = (date) => {
+  const phrase = formatForEdit({ name: "Task", date });   // e.g. "Task Jun 1 2026 at 3pm"
+  const split = splitInput(phrase);                        // strips the "Task " name back off
+  return split && split.date;
+};
+
+test("formatForEdit: 9am date round-trips through splitInput unchanged", () => {
+  const date = "2026-06-15T09:00";   // 9am ⇒ formatForEdit omits the time, parseDate defaults to 9am
+  assert.equal(roundTrip(date), date);
+});
+
+test("formatForEdit: non-9am time round-trips (pm)", () => {
+  const date = "2026-12-25T15:30";
+  assert.equal(roundTrip(date), date);
+});
+
+test("formatForEdit: midnight round-trips", () => {
+  const date = "2026-03-01T00:00";
+  assert.equal(roundTrip(date), date);
+});
+
+test("formatForEdit: on-the-hour pm with no minutes round-trips", () => {
+  const date = "2026-07-04T13:00";
+  assert.equal(roundTrip(date), date);
 });
 
 // --- urgency -----------------------------------------------------------------
