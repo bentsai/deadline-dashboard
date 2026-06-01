@@ -59,7 +59,7 @@
       --muted: #5f5f5f;
       --border-dim: #bcbcbc;
       --border-hover: #888;
-      --accent: #8a5a00;
+      --accent: #c44400;
       --past-bg: #dcdcdc;
       --past-fg: #595959;
       --what-bg: #f5f5f5;
@@ -290,7 +290,7 @@
       & .inline-input { border-color: var(--muted); color: var(--card-fg); }
       & .inline-input:focus { border-color: var(--card-fg); }
     }
-    .card:hover, .card:focus { outline-color: var(--accent); }
+    .card:hover, .card:focus { outline-color: var(--accent-bright); }
     .card:focus { outline-style: solid; }
     .card.soon:hover, .card.soon:focus { outline-color: var(--fg); }
     .card.editing { outline-color: var(--fg); cursor: default; justify-content: center; }
@@ -336,7 +336,7 @@
       transition: border-color .15s, transform .15s;
       contain: layout style paint;
     }
-    .what-card:hover { border-color: var(--accent); }
+    .what-card:hover { border-color: var(--accent-bright); }
     .what-card.dragging { opacity: .3; transform: scale(.95); }
     .what-card.editing { border-color: var(--fg); cursor: default; }
     .what-card .what-text {
