@@ -439,33 +439,25 @@
     const KEY = keyFor("when");
     const WHAT_KEY = keyFor("what");
 
-    function load() {
-      const raw = localStorage.getItem(KEY);
+    // Read JSON from a key; on missing/corrupt data, seed via seedFn() and persist.
+    function loadJSON(key, seedFn) {
+      const raw = localStorage.getItem(key);
       if (raw) {
-        try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt When data, reseeding", e); }
+        try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt data, reseeding", key, e); }
       }
-      const seed = DOMAIN ? [] : makeSeed();
-      save(seed);
+      const seed = seedFn();
+      saveJSON(key, seed);
       return seed;
     }
 
-    function save(whens) {
-      localStorage.setItem(KEY, JSON.stringify(whens));
+    function saveJSON(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
     }
 
-    function loadWhat() {
-      const raw = localStorage.getItem(WHAT_KEY);
-      if (raw) {
-        try { return JSON.parse(raw); } catch(e) { console.warn("Corrupt What data, reseeding", e); }
-      }
-      const seed = DOMAIN ? [] : WHAT_SEED;
-      saveWhat(seed);
-      return seed;
-    }
-
-    function saveWhat(cards) {
-      localStorage.setItem(WHAT_KEY, JSON.stringify(cards));
-    }
+    function load() { return loadJSON(KEY, () => DOMAIN ? [] : makeSeed()); }
+    function save(whens) { saveJSON(KEY, whens); }
+    function loadWhat() { return loadJSON(WHAT_KEY, () => DOMAIN ? [] : WHAT_SEED); }
+    function saveWhat(cards) { saveJSON(WHAT_KEY, cards); }
 
     const WORDS_KEY = keyFor("words");
     function loadWords() { return localStorage.getItem(WORDS_KEY) || ""; }
@@ -627,6 +619,15 @@
       return "done " + date + " at " + time;
     }
 
+    // Activate a card via keyboard (Enter/Space) unless it's already in edit mode.
+    function activateOnKey(card, activate) {
+      card.addEventListener("keydown", (e) => {
+        if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault(); activate();
+        }
+      });
+    }
+
     function render() {
       const whens = load();
       whens.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -659,14 +660,33 @@
           + '<div class="card-days">' + colonBefore + number + colonAfter + '</div>'
           + '<span class="label">' + label + '</span>';
         card.addEventListener("click", () => startEdit(card, i));
-        card.addEventListener("keydown", (e) => {
-          if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault(); startEdit(card, i);
-          }
-        });
+        activateOnKey(card, () => startEdit(card, i));
         grid.appendChild(card);
       });
       flashTarget = null;
+    }
+
+    // Wire an inline textarea: focus (+ optional select-all), Enter=save, Esc=cancel,
+    // and for add cards, save/cancel on blur. stopPropagation keeps keys off the card.
+    // The `done` latch ensures only the first action wins: cancel/save re-renders away
+    // the focused input, which fires a trailing blur — without the latch that blur would
+    // re-save a card the user just Escaped.
+    function wireInput(input, {onSave, onCancel, selectAll, saveOnBlur}) {
+      let done = false;
+      const save = () => { if (!done) { done = true; onSave(); } };
+      const cancel = () => { if (!done) { done = true; onCancel(); } };
+      input.focus();
+      if (selectAll) input.setSelectionRange(0, input.value.length);
+      input.addEventListener("keydown", (e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") { e.preventDefault(); save(); }
+        if (e.key === "Escape") cancel();
+      });
+      if (saveOnBlur) {
+        input.addEventListener("blur", () => {
+          if (input.value.trim()) save(); else cancel();
+        });
+      }
     }
 
     function showWhenAdd() {
@@ -677,16 +697,7 @@
       addCard.innerHTML = '<textarea class="inline-input" id="add-input" rows="2" placeholder="Project proposal due June 15"></textarea>'
         + '<span class="inline-hint">Enter to save. Esc to cancel. No date = today 5pm.</span>';
       grid.appendChild(addCard);
-      const input = document.getElementById("add-input");
-      input.focus();
-      input.addEventListener("keydown", (e) => {
-        e.stopPropagation();
-        if (e.key === "Enter") { e.preventDefault(); doAdd(); }
-        if (e.key === "Escape") render();
-      });
-      input.addEventListener("blur", () => {
-        if (input.value.trim()) doAdd(); else render();
-      });
+      wireInput(document.getElementById("add-input"), {onSave: doAdd, onCancel: render, saveOnBlur: true});
     }
 
     function parseWhenInput(val) {
@@ -716,10 +727,13 @@
       addingWhen = false;
     }
 
-    function findWhen(name, date) {
+    // Find a When by its original name+date, apply mutate(all, ri), persist, re-render.
+    // No-op (just re-renders) if the record is gone.
+    function updateWhen(name, date, mutate) {
       const all = load();
       const ri = all.findIndex(x => x.name === name && x.date === date);
-      return {all, ri};
+      if (ri !== -1) { mutate(all, ri); save(all); }
+      render();
     }
 
     function startEdit(card, idx) {
@@ -733,21 +747,15 @@
       card.innerHTML = '<textarea class="inline-input" id="edit-input" rows="2">' + escHtml(formatForEdit(d)) + '</textarea>'
         + '<div class="inline-actions"><button id="edit-save">save</button><button id="edit-done">' + (d.done ? "mark undone" : "mark done") + '</button><button id="edit-cancel">cancel</button><button class="card-delete danger" id="edit-delete">delete</button></div>';
       const input = document.getElementById("edit-input");
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
       function trySave() {
         const val = input.value.trim();
         if (!val) { render(); return; }
         const {name, date} = parseWhenInput(val);
-        const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) { all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt}; save(all); }
-        render();
+        updateWhen(origName, origDate, (all, ri) => {
+          all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt};
+        });
       }
-      input.addEventListener("keydown", (e) => {
-        e.stopPropagation();
-        if (e.key === "Enter") { e.preventDefault(); trySave(); }
-        if (e.key === "Escape") render();
-      });
+      wireInput(input, {onSave: trySave, onCancel: render, selectAll: true});
       document.getElementById("edit-save").addEventListener("click", (e) => {
         e.stopPropagation();
         trySave();
@@ -758,20 +766,15 @@
       });
       document.getElementById("edit-done").addEventListener("click", (e) => {
         e.stopPropagation();
-        const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) {
+        updateWhen(origName, origDate, (all, ri) => {
           all[ri].done = !d.done;
           if (all[ri].done) all[ri].doneAt = new Date().toISOString();
           else delete all[ri].doneAt;
-          save(all);
-        }
-        render();
+        });
       });
       document.getElementById("edit-delete").addEventListener("click", (e) => {
         e.stopPropagation();
-        const {all, ri} = findWhen(origName, origDate);
-        if (ri !== -1) { all.splice(ri, 1); save(all); }
-        render();
+        updateWhen(origName, origDate, (all, ri) => all.splice(ri, 1));
       });
       card.addEventListener("click", (e) => e.stopPropagation());
       card.addEventListener("keydown", (e) => {
@@ -793,11 +796,7 @@
         card.dataset.idx = i;
         card.innerHTML = '<span class="what-text">' + escHtml(c.text) + '</span>';
         card.addEventListener("click", () => startWhatEdit(card, i));
-        card.addEventListener("keydown", (e) => {
-          if (!card.classList.contains("editing") && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault(); startWhatEdit(card, i);
-          }
-        });
+        activateOnKey(card, () => startWhatEdit(card, i));
         card.addEventListener("dragstart", (e) => {
           e.dataTransfer.effectAllowed = "move";
           whatDragIdx = i;
@@ -832,15 +831,7 @@
       addCard.className = "add-card active";
       addCard.innerHTML = '<textarea class="inline-input" id="what-add-input" rows="3" placeholder="What is top of mind?"></textarea>';
       grid.appendChild(addCard);
-      const input = document.getElementById("what-add-input");
-      input.focus();
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") { e.preventDefault(); doWhatAdd(); }
-        if (e.key === "Escape") renderWhat();
-      });
-      input.addEventListener("blur", () => {
-        if (input.value.trim()) doWhatAdd(); else renderWhat();
-      });
+      wireInput(document.getElementById("what-add-input"), {onSave: doWhatAdd, onCancel: renderWhat, saveOnBlur: true});
     }
 
     let addingWhat = false;
@@ -865,8 +856,6 @@
       card.innerHTML = '<textarea class="inline-input" id="what-edit-input" rows="3">' + escHtml(cards[idx].text) + '</textarea>'
         + '<div class="inline-actions"><button id="what-edit-save">save</button><button id="what-edit-cancel">cancel</button><button class="card-delete danger" id="what-edit-delete">delete</button></div>';
       const input = document.getElementById("what-edit-input");
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
       function trySave() {
         const val = input.value.trim();
         if (!val) { renderWhat(); return; }
@@ -874,11 +863,7 @@
         saveWhat(cards);
         renderWhat();
       }
-      input.addEventListener("keydown", (e) => {
-        e.stopPropagation();
-        if (e.key === "Enter") { e.preventDefault(); trySave(); }
-        if (e.key === "Escape") renderWhat();
-      });
+      wireInput(input, {onSave: trySave, onCancel: renderWhat, selectAll: true});
       document.getElementById("what-edit-save").addEventListener("click", (e) => {
         e.stopPropagation();
         trySave();
