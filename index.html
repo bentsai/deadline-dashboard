@@ -347,6 +347,42 @@
     .what-card .inline-actions button:hover { border-color: var(--fg); color: var(--fg); }
     .what-card .inline-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
     #export-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    @media (max-width: 600px) {
+      /* Cascades into both card types */
+      :root { --card-min-h: 150px; }
+
+      /* Global spacing — the body padding cut frees the width for 2-up */
+      body { padding: 1rem; }
+      .section { margin-bottom: 1.25rem; }
+      .section-head { margin-bottom: 1rem; border-bottom-width: 4px; }
+      h2 { font-size: 1.8rem; }
+      .add-btn { font-size: 2.4rem; }
+      /* Force exactly 2 columns (auto-fill would pack 3 as the viewport nears 600px) */
+      .grid, .what-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+      /* When cards: compact padding + lighter frame */
+      .card { padding: 1rem; gap: .4rem; border-width: 3px; outline-width: 2px; }
+      .card-days { font-size: 3.25rem; }
+      .card .stamp { font-size: 7rem; }
+      .card.soon .stamp { font-size: 8rem; }
+      .card-name { font-size: 1.15rem; min-height: 0; overflow-wrap: anywhere; }
+      .card-date { font-size: .8rem; }
+      .label { font-size: .95rem; }
+
+      /* What cards */
+      .what-card { padding: 1rem; }
+      .what-card .what-text { font-size: 1.4rem; }
+
+      /* Add-card placeholder lives in both grids; match compact padding */
+      .add-card { padding: 1rem; }
+
+      /* Editing needs room: span both columns so the textarea + buttons get full width */
+      .card.editing, .what-card.editing { grid-column: 1 / -1; }
+      .inline-actions { flex-wrap: wrap; gap: .5rem; }
+
+      /* Words: minor tuning */
+      #words-text { font-size: 1.5rem; padding: 1rem; }
+    }
   </style>
   <script>
     // Apply saved theme before first paint to avoid a flash of the wrong theme.
