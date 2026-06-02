@@ -499,25 +499,24 @@
       const hour = time ? time.hour : 9;
       const min = time ? time.min : 0;
 
-      if (base === "today") return makeDate(now.getFullYear(), now.getMonth(), now.getDate(), hour, min);
-      if (base === "tomorrow") {
-        const d = new Date(now); d.setDate(d.getDate() + 1);
+      // The date `days` from now (0 = today), at the parsed time-of-day.
+      function dayOffset(days) {
+        const d = new Date(now);
+        d.setDate(d.getDate() + days);
         return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
       }
-      if (base === "next week") {       // synonym for "in 1 week" — +7 days
-        const d = new Date(now); d.setDate(d.getDate() + 7);
-        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
-      }
+
+      if (base === "today") return dayOffset(0);
+      if (base === "tomorrow") return dayOffset(1);
+      if (base === "next week") return dayOffset(7);   // synonym for "in 1 week"
 
       function nearestWeekday(dayName, skip) {
         const target = DAYS[dayName];
         if (target === undefined) return null;
-        const d = new Date(now);
-        let diff = target - d.getDay();
+        let diff = target - now.getDay();
         if (diff < 0) diff += 7;
         if (skip) diff += 7;
-        d.setDate(d.getDate() + diff);
-        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
+        return dayOffset(diff);
       }
 
       const nextDay = base.match(/^next\s+(\w+)$/);
@@ -540,11 +539,8 @@
       if (inX) {
         const n = parseInt(inX[1]);
         const unit = inX[2];
-        const d = new Date(now);
-        if (unit.startsWith("hour")) { d.setTime(d.getTime() + n * MS_HOUR); return formatISOLocal(d); }
-        if (unit.startsWith("week")) d.setDate(d.getDate() + n * 7);
-        else d.setDate(d.getDate() + n);
-        return makeDate(d.getFullYear(), d.getMonth(), d.getDate(), hour, min);
+        if (unit.startsWith("hour")) return formatISOLocal(new Date(now.getTime() + n * MS_HOUR));
+        return dayOffset(unit.startsWith("week") ? n * 7 : n);
       }
 
       const slashDate = base.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
