@@ -573,9 +573,10 @@
       ];
       for (const re of patterns) {
         const m = s.match(re);
-        if (m && m[1].trim() && parseDate(m[2].trim())) {
-          return { name: m[1].trim(), date: parseDate(m[2].trim()) };
-        }
+        if (!m) continue;
+        const name = m[1].trim();
+        const date = parseDate(m[2].trim());
+        if (name && date) return { name, date };
       }
       return null;
     }
