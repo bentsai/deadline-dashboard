@@ -714,7 +714,7 @@
       const {name, date} = parseWhenInput(val);
       addingWhen = true;
       const whens = load();
-      whens.push({name: name, date: date});
+      whens.push({name, date});
       save(whens);
       flashTarget = name;
       render();
@@ -746,7 +746,7 @@
         if (!val) { render(); return; }
         const {name, date} = parseWhenInput(val);
         updateWhen(origName, origDate, (all, ri) => {
-          all[ri] = {name: name, date: date, done: all[ri].done, doneAt: all[ri].doneAt};
+          all[ri] = {name, date, done: all[ri].done, doneAt: all[ri].doneAt};
         });
       }
       wireInput(input, {onSave: trySave, onCancel: render, selectAll: true});
