@@ -911,10 +911,11 @@
     }
 
     if (DOMAIN) {
-      document.title = "What & When · " + DOMAIN;
+      const domainLabel = DOMAIN.replace(/-/g, " ");   // hyphens render as spaces
+      document.title = "What & When · " + domainLabel;
       const label = document.createElement("span");
       label.className = "domain-label";
-      label.textContent = DOMAIN;
+      label.textContent = domainLabel;
       document.querySelector(".cluster").prepend(label);
     }
 
